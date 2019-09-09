@@ -64,24 +64,53 @@ toolkit:
 
 
 inputs:
-  - example_step_input: Default Value - you can leave this empty if you want to
+  - genymotion_cloud_saas_login: ""
     opts:
-      title: "Example Step Input"
-      summary: Summary. No more than 2-3 sentences.
-      description: |
-        Description of this input.
-
-        Can be Markdown formatted text.
-      is_expand: true
+      title: genymotion_cloud_saas_login
+      summary: ""
+      description: |-
+        Email of your Genymotion Cloud SaaS account
       is_required: true
-      value_options: []
+
+  - genymotion_cloud_saas_password: ""
+    opts:
+      title: genymotion_cloud_saas_password
+      summary: ""
+      description: |-
+        Password of your Genymotion Cloud SaaS account
+      is_required: true
+
+  - genymotion_cloud_saas_recipe_uuid: ""
+    opts:
+      title: genymotion_cloud_saas_recipe_uuid
+      summary: ""
+      description: |-
+        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrived using `gmsaas recipes list`
+      is_required: true
+
+  - genymotion_cloud_saas_instance_name: ""
+    opts:
+      title: genymotion_cloud_saas_instance_name
+      summary: ""
+      description: |-
+        Name of the instance you want to start
+      is_required: true
+
+  - genymotion_cloud_saas_adb_serial_port: ""
+    opts:
+      title: genymotion_cloud_saas_adb_serial_port
+      summary: ""
+      description: |-
+         If `genymotion_cloud_saas_adb_serial_port` option is set, the instance will be connected to ADB on localhost:`genymotion_cloud_saas_adb_serial_port`. Otherwise it will be connected with random port.
 
 outputs:
-  - EXAMPLE_STEP_OUTPUT:
+  - GENYMOTION_CLOUD_SAAS_INSTANCE_UUID:
     opts:
-      title: "Example Step Output"
-      summary: Summary. No more than 2-3 sentences.
+      title: UUID of the instance connected
       description: |
-        Description of this output.
-
-        Can be Markdown formatted text.
+        Return the UUID of the instance started and connected
+  - GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL:
+    opts:
+      title: ADB Serial Port of the instance connected
+      description: |
+        Return the ADB Serial Port of the instance started and connected
