@@ -6,7 +6,7 @@ app:
   # If you want to share this step into a StepLib
   - BITRISE_STEP_ID: genymotion-cloud-saas-start
   - BITRISE_STEP_VERSION: "0.0.1"
-  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start.git
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - GENYMOTION_CLOUD_SAAS_LOGIN: $GENYMOTION_CLOUD_SAAS_LOGIN
   - GENYMOTION_CLOUD_SAAS_PASSWORD: $GENYMOTION_CLOUD_SAAS_PASSWORD
