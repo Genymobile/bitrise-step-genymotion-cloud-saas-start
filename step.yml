@@ -13,9 +13,9 @@ summary: |
   Start Genymotion Cloud SaaS Android devices
 description: |
   Start Genymotion Cloud SaaS Android devices
-website: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
-source_code_url: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
-support_url: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start/issues
+website: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
+source_code_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
+support_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start/issues
 host_os_tags:
   - osx-10.10
   - ubuntu-16.04
@@ -60,7 +60,7 @@ deps:
 
 toolkit:
   go:
-    package_name: github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
+    package_name: github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 
 
 inputs:
