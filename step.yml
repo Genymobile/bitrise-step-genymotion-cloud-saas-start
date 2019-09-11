@@ -85,7 +85,7 @@ inputs:
       title: genymotion_cloud_saas_recipe_uuid
       summary: ""
       description: |-
-        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrived using `gmsaas recipes list`
+        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
       is_required: true
 
   - genymotion_cloud_saas_instance_name: ""
@@ -93,7 +93,7 @@ inputs:
       title: genymotion_cloud_saas_instance_name
       summary: ""
       description: |-
-        Name of the instance you want to start
+        Name given to the newly created instance
       is_required: true
 
   - genymotion_cloud_saas_adb_serial_port: ""
@@ -101,7 +101,10 @@ inputs:
       title: genymotion_cloud_saas_adb_serial_port
       summary: ""
       description: |-
-         If `genymotion_cloud_saas_adb_serial_port` option is set, the instance will be connected to ADB on localhost:`genymotion_cloud_saas_adb_serial_port`. Otherwise it will be connected with random port.
+          If `genymotion_cloud_saas_adb_serial_port` option is set,
+          the instance will be connected to ADB on localhost:`genymotion_cloud_saas_adb_serial_port`.
+          Otherwise it will be connected to a port given by your system,
+          `gmsaas instances list` to know which one.
 
 outputs:
   - GENYMOTION_CLOUD_SAAS_INSTANCE_UUID:
@@ -109,7 +112,7 @@ outputs:
       title: UUID of the instance connected
       description: |
         Return the UUID of the instance started and connected
-  - GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL:
+  - GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port of the instance connected
       description: |

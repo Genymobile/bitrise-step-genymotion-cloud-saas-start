@@ -12,7 +12,7 @@ app:
   - GENYMOTION_CLOUD_SAAS_PASSWORD: $GENYMOTION_CLOUD_SAAS_PASSWORD
 
 workflows:
-  test:     
+  test:
     steps:
     - script:
         inputs:
@@ -46,7 +46,7 @@ workflows:
         - content: |
             #!/bin/bash
             echo "The value of 'GENYMOTION_CLOUD_SAAS_INSTANCE_UUID' is: $GENYMOTION_CLOUD_SAAS_INSTANCE_UUID
-            echo "The value of 'GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL' is: $GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL
+            echo "The value of 'GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
     - path::../bitrise-step-genymotion-cloud-saas-stop:
           title: "Genymotion Cloud SaaS Stop"
           description: |-

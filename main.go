@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	genymotionCloudSaaSInstanceUUID      = "GENYMOTION_CLOUD_SAAS_INSTANCE_UUID"
-	genymotionCloudSaaSInstanceADBSerial = "GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL"
+	genymotionCloudSaaSInstanceUUID          = "GENYMOTION_CLOUD_SAAS_INSTANCE_UUID"
+	genymotionCloudSaaSInstanceADBSerialPort = "GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT"
 )
 
 // Config ...
@@ -66,23 +66,23 @@ func getInstancesList() []string {
 }
 
 func checkAndroidSDKPath() {
-	log.Infof("[INFO] Check Android SDK configuration")
+	log.Infof("Check Android SDK configuration")
 	cmd := exec.Command("gmsaas", "config", "get", "android-sdk-path")
 	stdout, _ := cmd.CombinedOutput()
 	if strings.Compare(strings.TrimRight(string(stdout), "\n"), "None") == 0 {
-		failf("[ERROR] Please configure android-sdk-path, you can find more information here: https://docs.genymotion.com/saas/latest/08_gmsaas.html#configuration")
+		failf("Please configure android-sdk-path, you can find more information here: https://docs.genymotion.com/saas/latest/08_gmsaas.html#configuration")
 	} else {
-		log.Infof("[INFO] Android SDK is configured")
+		log.Infof("Android SDK is configured")
 	}
 }
 
 func login(username, password string) {
-	log.Infof("[INFO] Login Genymotion Account")
+	log.Infof("Login Genymotion Account")
 	cmd, err := exec.Command("gmsaas", "auth", "login", username, password).CombinedOutput()
 	if err != nil {
-		failf("[ERROR] Failed to log with gmsaas, error: %#v | output: %s", err, cmd)
+		failf("Failed to log with gmsaas, error: %#v | output: %s", err, cmd)
 	} else {
-		log.Infof("[INFO] Logged to Genymotion Cloud SaaS platform")
+		log.Infof("Logged to Genymotion Cloud SaaS platform")
 	}
 }
 
@@ -104,14 +104,13 @@ func main() {
 
 	login(c.GenymotionCloudLogin, c.GenymotionCloudPassword)
 
-	log.Infof("[INFO] Start Android devices on Genymotion Cloud SaaS")
+	log.Infof("Start Android devices on Genymotion Cloud SaaS")
 	cmd := exec.Command("gmsaas", "instances", "start", c.GenymotionCloudRecipeUUID, c.GenymotionCloudInstanceName)
 	stdout, err := cmd.CombinedOutput()
 	if err != nil {
-		failf("[ERROR] Failed to start a device, error: %#v | output: %s", err, stdout)
+		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
 	} else {
-		log.Infof("[INFO] Device started %s", stdout)
-
+		log.Infof("Device started %s", stdout)
 	}
 
 	instanceUUID := strings.TrimRight(string(stdout), "\n")
@@ -122,34 +121,33 @@ func main() {
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("[INFO] Device stopped %s", instanceUUID)
-			failf("[ERROR] Error: %s", output)
+			log.Errorf("Device stopped %s", instanceUUID)
+			failf("Error: %s", output)
 		}
 	} else {
 		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("[INFO] Device stopped %s", instanceUUID)
-			failf("[ERROR] Error: %s", output)
+			log.Errorf("Device stopped %s", instanceUUID)
+			failf("Error: %s", output)
 		}
 	}
 
-	_, InstanceADBSerial := getInstanceDetails(c.GenymotionCloudInstanceName)
+	_, InstanceADBSerialPort := getInstanceDetails(c.GenymotionCloudInstanceName)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
-		genymotionCloudSaaSInstanceUUID:      instanceUUID,
-		genymotionCloudSaaSInstanceADBSerial: InstanceADBSerial,
+		genymotionCloudSaaSInstanceUUID:          instanceUUID,
+		genymotionCloudSaaSInstanceADBSerialPort: InstanceADBSerialPort,
 	}
 
 	for k, v := range outputs {
 		if err := exportEnvironmentWithEnvman(k, v); err != nil {
-			failf("[ERROR] Failed to export %s, error: %v", k, err)
+			failf("Failed to export %s, error: %v", k, err)
 		}
 	}
 
-	// */
 	// --- Exit codes:
 	// The exit code of your Step is very important. If you return
 	//  with a 0 exit code `bitrise` will register your Step as "successful".
