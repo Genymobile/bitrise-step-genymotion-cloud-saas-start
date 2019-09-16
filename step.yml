@@ -13,9 +13,9 @@ summary: |
   Start Genymotion Cloud SaaS Android devices
 description: |
   Start Genymotion Cloud SaaS Android devices
-website: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
-source_code_url: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
-support_url: https://github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start/issues
+website: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
+source_code_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
+support_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start/issues
 host_os_tags:
   - osx-10.10
   - ubuntu-16.04
@@ -60,28 +60,60 @@ deps:
 
 toolkit:
   go:
-    package_name: github.com/thomascarpentier/bitrise-step-genymotion-cloud-saas-start
+    package_name: github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 
 
 inputs:
-  - example_step_input: Default Value - you can leave this empty if you want to
+  - genymotion_cloud_saas_login: ""
     opts:
-      title: "Example Step Input"
-      summary: Summary. No more than 2-3 sentences.
-      description: |
-        Description of this input.
-
-        Can be Markdown formatted text.
-      is_expand: true
+      title: genymotion_cloud_saas_login
+      summary: ""
+      description: |-
+        Email of your Genymotion Cloud SaaS account
       is_required: true
-      value_options: []
+
+  - genymotion_cloud_saas_password: ""
+    opts:
+      title: genymotion_cloud_saas_password
+      summary: ""
+      description: |-
+        Password of your Genymotion Cloud SaaS account
+      is_required: true
+
+  - genymotion_cloud_saas_recipe_uuid: ""
+    opts:
+      title: genymotion_cloud_saas_recipe_uuid
+      summary: ""
+      description: |-
+        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
+      is_required: true
+
+  - genymotion_cloud_saas_instance_name: ""
+    opts:
+      title: genymotion_cloud_saas_instance_name
+      summary: ""
+      description: |-
+        Name given to the newly created instance
+      is_required: true
+
+  - genymotion_cloud_saas_adb_serial_port: ""
+    opts:
+      title: genymotion_cloud_saas_adb_serial_port
+      summary: ""
+      description: |-
+          If `genymotion_cloud_saas_adb_serial_port` option is set,
+          the instance will be connected to ADB on localhost:`genymotion_cloud_saas_adb_serial_port`.
+          Otherwise it will be connected to a port given by your system,
+          `gmsaas instances list` to know which one.
 
 outputs:
-  - EXAMPLE_STEP_OUTPUT:
+  - GENYMOTION_CLOUD_SAAS_INSTANCE_UUID:
     opts:
-      title: "Example Step Output"
-      summary: Summary. No more than 2-3 sentences.
+      title: UUID of the instance connected
       description: |
-        Description of this output.
-
-        Can be Markdown formatted text.
+        Return the UUID of the instance started and connected
+  - GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
+    opts:
+      title: ADB Serial Port of the instance connected
+      description: |
+        Return the ADB Serial Port of the instance started and connected
