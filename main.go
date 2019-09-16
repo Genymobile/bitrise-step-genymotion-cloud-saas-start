@@ -77,7 +77,7 @@ func configureAndroidSDKPath() {
 		}
 		log.Infof("Android SDK is configured")
 	} else {
-		failf("Please set ANDROID_HOME environnment variable")
+		failf("Please set ANDROID_HOME environment variable")
 	}
 }
 
