@@ -65,14 +65,19 @@ func getInstancesList() []string {
 	return result
 }
 
-func checkAndroidSDKPath() {
-	log.Infof("Check Android SDK configuration")
-	cmd := exec.Command("gmsaas", "config", "get", "android-sdk-path")
-	stdout, _ := cmd.CombinedOutput()
-	if strings.Compare(strings.TrimRight(string(stdout), "\n"), "None") == 0 {
-		failf("Please configure android-sdk-path, you can find more information here: https://docs.genymotion.com/saas/latest/08_gmsaas.html#configuration")
-	} else {
+func configureAndroidSDKPath() {
+	log.Infof("Configure Android SDK configuration")
+
+	value, exists := os.LookupEnv("ANDROID_HOME")
+	if exists {
+		cmd := exec.Command("gmsaas", "config", "set", "android-sdk-path", value)
+		stdout, err := cmd.CombinedOutput()
+		if err != nil {
+			failf("Fail to set android-sdk-path, error: %#v | output: %s", err, stdout)
+		}
 		log.Infof("Android SDK is configured")
+	} else {
+		failf("Please set ANDROID_HOME environment variable")
 	}
 }
 
@@ -100,7 +105,7 @@ func main() {
 	}
 	stepconf.Print(c)
 
-	checkAndroidSDKPath()
+	configureAndroidSDKPath()
 
 	login(c.GenymotionCloudLogin, c.GenymotionCloudPassword)
 
