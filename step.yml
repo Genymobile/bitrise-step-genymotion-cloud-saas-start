@@ -64,55 +64,55 @@ toolkit:
 
 
 inputs:
-  - genymotion_cloud_saas_login: ""
+  - gmcloud_saas_email: ""
     opts:
-      title: genymotion_cloud_saas_login
+      title: Genymotion Cloud SaaS email
       summary: ""
       description: |-
         Email of your Genymotion Cloud SaaS account
       is_required: true
 
-  - genymotion_cloud_saas_password: ""
+  - gmcloud_saas_password: ""
     opts:
-      title: genymotion_cloud_saas_password
+      title: Genymotion Cloud SaaS password
       summary: ""
       description: |-
         Password of your Genymotion Cloud SaaS account
       is_required: true
 
-  - genymotion_cloud_saas_recipe_uuid: ""
+  - gmcloud_saas_recipe_uuid: ""
     opts:
-      title: genymotion_cloud_saas_recipe_uuid
+      title: Recipe UUID
       summary: ""
       description: |-
         Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
       is_required: true
 
-  - genymotion_cloud_saas_instance_name: ""
+  - gmcloud_saas_instance_name: ""
     opts:
-      title: genymotion_cloud_saas_instance_name
+      title: Instance name
       summary: ""
       description: |-
         Name given to the newly created instance
       is_required: true
 
-  - genymotion_cloud_saas_adb_serial_port: ""
+  - gmcloud_saas_adb_serial_port: ""
     opts:
-      title: genymotion_cloud_saas_adb_serial_port
+      title: ADB serial port
       summary: ""
       description: |-
-          If `genymotion_cloud_saas_adb_serial_port` option is set,
-          the instance will be connected to ADB on localhost:`genymotion_cloud_saas_adb_serial_port`.
+          If `gmcloud_saas_adb_serial_port` option is set,
+          the instance will be connected to ADB on localhost:`gmcloud_saas_adb_serial_port`.
           Otherwise it will be connected to a port given by your system,
           `gmsaas instances list` to know which one.
 
 outputs:
-  - GENYMOTION_CLOUD_SAAS_INSTANCE_UUID:
+  - GMCLOUD_SAAS_INSTANCE_UUID:
     opts:
       title: UUID of the instance connected
       description: |
         Return the UUID of the instance started and connected
-  - GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
+  - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port of the instance connected
       description: |
