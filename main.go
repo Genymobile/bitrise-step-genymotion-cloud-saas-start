@@ -12,18 +12,18 @@ import (
 )
 
 const (
-	genymotionCloudSaaSInstanceUUID          = "GENYMOTION_CLOUD_SAAS_INSTANCE_UUID"
-	genymotionCloudSaaSInstanceADBSerialPort = "GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT"
+	GMCloudSaaSInstanceUUID          = "GMCLOUD_SAAS_INSTANCE_UUID"
+	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_INSTANCE_ADB_SERIAL_PORT"
 )
 
 // Config ...
 type Config struct {
-	GenymotionCloudLogin    string `env:"genymotion_cloud_saas_login,required"`
-	GenymotionCloudPassword string `env:"genymotion_cloud_saas_password,required"`
+	GMCloudSaaSEmail    string `env:"gmcloud_saas_email,required"`
+	GMCloudSaaSPassword string `env:"gmcloud_saas_password,required"`
 
-	GenymotionCloudRecipeUUID    string `env:"genymotion_cloud_saas_recipe_uuid,required"`
-	GenymotionCloudInstanceName  string `env:"genymotion_cloud_saas_instance_name,required"`
-	GenymotionCloudAdbSerialPort string `env:"genymotion_cloud_saas_adb_serial_port"`
+	GMCloudSaaSRecipeUUID    string `env:"gmcloud_saas_recipe_uuid,required"`
+	GMCloudSaaSInstanceName  string `env:"gmcloud_saas_instance_name,required"`
+	GMCloudSaaSAdbSerialPort string `env:"gmcloud_saas_adb_serial_port"`
 }
 
 // failf prints an error and terminates the step.
@@ -107,10 +107,10 @@ func main() {
 
 	configureAndroidSDKPath()
 
-	login(c.GenymotionCloudLogin, c.GenymotionCloudPassword)
+	login(c.GMCloudSaaSEmail, c.GMCloudSaaSPassword)
 
 	log.Infof("Start Android devices on Genymotion Cloud SaaS")
-	cmd := exec.Command("gmsaas", "instances", "start", c.GenymotionCloudRecipeUUID, c.GenymotionCloudInstanceName)
+	cmd := exec.Command("gmsaas", "instances", "start", c.GMCloudSaaSRecipeUUID, c.GMCloudSaaSInstanceName)
 	stdout, err := cmd.CombinedOutput()
 	if err != nil {
 		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
@@ -121,8 +121,8 @@ func main() {
 	instanceUUID := strings.TrimRight(string(stdout), "\n")
 
 	// Connect to adb with adb-serial-port
-	if c.GenymotionCloudAdbSerialPort != "" {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", c.GenymotionCloudAdbSerialPort)
+	if c.GMCloudSaaSAdbSerialPort != "" {
+		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", c.GMCloudSaaSAdbSerialPort)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
@@ -139,12 +139,12 @@ func main() {
 		}
 	}
 
-	_, InstanceADBSerialPort := getInstanceDetails(c.GenymotionCloudInstanceName)
+	_, InstanceADBSerialPort := getInstanceDetails(c.GMCloudSaaSInstanceName)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
-		genymotionCloudSaaSInstanceUUID:          instanceUUID,
-		genymotionCloudSaaSInstanceADBSerialPort: InstanceADBSerialPort,
+		GMCloudSaaSInstanceUUID:          instanceUUID,
+		GMCloudSaaSInstanceADBSerialPort: InstanceADBSerialPort,
 	}
 
 	for k, v := range outputs {

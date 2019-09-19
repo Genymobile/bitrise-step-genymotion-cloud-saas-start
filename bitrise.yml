@@ -8,8 +8,8 @@ app:
   - BITRISE_STEP_VERSION: "0.0.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
-  - GENYMOTION_CLOUD_SAAS_LOGIN: $GENYMOTION_CLOUD_SAAS_LOGIN
-  - GENYMOTION_CLOUD_SAAS_PASSWORD: $GENYMOTION_CLOUD_SAAS_PASSWORD
+  - GMCLOUD_SAAS_LOGIN: $GMCLOUD_SAAS_EMAIL
+  - GMCLOUD_SAAS_PASSWORD: $GMCLOUD_SAAS_PASSWORD
 
 workflows:
   test:
@@ -37,23 +37,23 @@ workflows:
            Start genymotion Cloud SaaS Android Devices
         run_if: "true"
         inputs:
-        - genymotion_cloud_saas_login: $GENYMOTION_CLOUD_SAAS_LOGIN
-        - genymotion_cloud_saas_password: $GENYMOTION_CLOUD_SAAS_PASSWORD
-        - genymotion_cloud_saas_instance_name: AndroidDeviceStartedByBitrise
-        - genymotion_cloud_saas_recipe_uuid: 107d757e-463a-4a18-8667-b8dec6e4c87e
-        - genymotion_cloud_saas_adb_serial_port:
+        - gmcloud_saas_email: $GMCLOUD_SAAS_EMAIL
+        - gmcloud_saas_password: $GMCLOUD_SAAS_PASSWORD
+        - gmcloud_saas_instance_name: AndroidDeviceStartedByBitrise
+        - gmcloud_saas_recipe_uuid: 107d757e-463a-4a18-8667-b8dec6e4c87e
+        - gmcloud_saas_adb_serial_port:
     - script:
         inputs:
         - content: |
             #!/bin/bash
-            echo "The value of 'GENYMOTION_CLOUD_SAAS_INSTANCE_UUID' is: $GENYMOTION_CLOUD_SAAS_INSTANCE_UUID
-            echo "The value of 'GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GENYMOTION_CLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_UUID' is: $GMCLOUD_SAAS_INSTANCE_UUID
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
     - path::../bitrise-step-genymotion-cloud-saas-stop:
           title: "Genymotion Cloud SaaS Stop"
           description: |-
            Stop genymotion Cloud SaaS Android Devices
           inputs:
-          - genymotion_cloud_saas_instance_uuid: $GENYMOTION_CLOUD_SAAS_INSTANCE_UUID
+          - gmcloud_saas_instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
 
 
   # ----------------------------------------------------------------
