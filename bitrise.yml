@@ -32,9 +32,6 @@ workflows:
         - path: ./_tmp
         - is_create_path: true
     - path::./:
-        title: Genymotion Cloud SaaS Start
-        description: |-
-           Start genymotion Cloud SaaS Android Devices
         run_if: "true"
         inputs:
         - gmcloud_saas_email: $GMCLOUD_SAAS_EMAIL
@@ -49,9 +46,7 @@ workflows:
             echo "The value of 'GMCLOUD_SAAS_INSTANCE_UUID' is: $GMCLOUD_SAAS_INSTANCE_UUID
             echo "The value of 'GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
     - path::../bitrise-step-genymotion-cloud-saas-stop:
-          title: "Genymotion Cloud SaaS Stop"
-          description: |-
-           Stop genymotion Cloud SaaS Android Devices
+
           inputs:
           - gmcloud_saas_instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
 
