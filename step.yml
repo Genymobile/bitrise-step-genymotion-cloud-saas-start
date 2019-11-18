@@ -80,6 +80,7 @@ inputs:
       description: |-
         Password of your Genymotion Cloud SaaS account
       is_required: true
+      is_sensitive: true
 
   - gmcloud_saas_recipe_uuid: ""
     opts:
