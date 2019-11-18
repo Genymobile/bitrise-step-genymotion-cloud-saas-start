@@ -65,7 +65,7 @@ toolkit:
 
 
 inputs:
-  - gmcloud_saas_email: ""
+  - email: ""
     opts:
       title: Genymotion Cloud SaaS email
       summary: ""
@@ -73,7 +73,7 @@ inputs:
         Email of your Genymotion Cloud SaaS account
       is_required: true
 
-  - gmcloud_saas_password: ""
+  - password: ""
     opts:
       title: Genymotion Cloud SaaS password
       summary: ""
@@ -82,7 +82,7 @@ inputs:
       is_required: true
       is_sensitive: true
 
-  - gmcloud_saas_recipe_uuid: ""
+  - recipe_uuid: ""
     opts:
       title: Recipe UUID
       summary: ""
@@ -90,7 +90,7 @@ inputs:
         Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
       is_required: true
 
-  - gmcloud_saas_instance_name: ""
+  - instance_name: ""
     opts:
       title: Instance name
       summary: ""
@@ -98,13 +98,13 @@ inputs:
         Name given to the newly created instance
       is_required: true
 
-  - gmcloud_saas_adb_serial_port: ""
+  - adb_serial_port: ""
     opts:
       title: ADB serial port
       summary: ""
       description: |-
-          If `gmcloud_saas_adb_serial_port` option is set,
-          the instance will be connected to ADB on localhost:`gmcloud_saas_adb_serial_port`.
+          If `adb_serial_port` option is set,
+          the instance will be connected to ADB on localhost:`adb_serial_port`.
           Otherwise it will be connected to a port given by your system,
           `gmsaas instances list` to know which one.
 

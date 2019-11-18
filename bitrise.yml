@@ -37,11 +37,11 @@ workflows:
            Start genymotion Cloud SaaS Android Devices
         run_if: "true"
         inputs:
-        - gmcloud_saas_email: $GMCLOUD_SAAS_EMAIL
-        - gmcloud_saas_password: $GMCLOUD_SAAS_PASSWORD
-        - gmcloud_saas_instance_name: AndroidDeviceStartedByBitrise
-        - gmcloud_saas_recipe_uuid: 107d757e-463a-4a18-8667-b8dec6e4c87e
-        - gmcloud_saas_adb_serial_port:
+        - email: $GMCLOUD_SAAS_EMAIL
+        - password: $GMCLOUD_SAAS_PASSWORD
+        - instance_name: AndroidDeviceStartedByBitrise
+        - recipe_uuid: 107d757e-463a-4a18-8667-b8dec6e4c87e
+        - adb_serial_port:
     - script:
         inputs:
         - content: |
@@ -53,7 +53,7 @@ workflows:
           description: |-
            Stop genymotion Cloud SaaS Android Devices
           inputs:
-          - gmcloud_saas_instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
+          - instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
 
 
   # ----------------------------------------------------------------

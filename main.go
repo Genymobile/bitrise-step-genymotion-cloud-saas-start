@@ -18,12 +18,12 @@ const (
 
 // Config ...
 type Config struct {
-	GMCloudSaaSEmail    string `env:"gmcloud_saas_email,required"`
-	GMCloudSaaSPassword string `env:"gmcloud_saas_password,required"`
+	GMCloudSaaSEmail    string `env:"email,required"`
+	GMCloudSaaSPassword string `env:"password,required"`
 
-	GMCloudSaaSRecipeUUID    string `env:"gmcloud_saas_recipe_uuid,required"`
-	GMCloudSaaSInstanceName  string `env:"gmcloud_saas_instance_name,required"`
-	GMCloudSaaSAdbSerialPort string `env:"gmcloud_saas_adb_serial_port"`
+	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
+	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
+	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
 }
 
 // failf prints an error and terminates the step.
