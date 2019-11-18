@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -25,6 +26,18 @@ type Config struct {
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
 	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
+}
+
+// install gmsaas if not installed.
+func ensureGMSAAS() error {
+	_, installed := os.LookupEnv("gmsaas")
+	if !installed {
+		cmd := command.New("pip3", "install", "gmsaas")
+		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		}
+	}
+	return nil
 }
 
 // failf prints an error and terminates the step.
@@ -108,6 +121,7 @@ func main() {
 	}
 	stepconf.Print(c)
 
+	ensureGMSAAS()
 	configureAndroidSDKPath()
 
 	login(c.GMCloudSaaSEmail, c.GMCloudSaaSPassword)

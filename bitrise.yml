@@ -26,12 +26,6 @@ workflows:
     before_run:
       - audit-this-step
     steps:
-    - script:
-        inputs:
-        - content: |
-            #!/bin/bash
-            pip3 install gmsaas
-            
     - change-workdir:
         title: Switch working dir to test / _tmp dir
         description: |-
