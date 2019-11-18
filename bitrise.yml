@@ -40,7 +40,7 @@ workflows:
     - path::./:
         title: Genymotion Cloud SaaS Start
         description: |-
-           Start genymotion Cloud SaaS Android Devices.
+           Start Genymotion Cloud SaaS Android Devices.
         run_if: "true"
         inputs:
         - email: $GMCLOUD_SAAS_EMAIL
@@ -57,7 +57,7 @@ workflows:
     - path::../bitrise-step-genymotion-cloud-saas-stop:
           title: "Genymotion Cloud SaaS Stop"
           description: |-
-           Stop genymotion Cloud SaaS Android Devices.
+           Stop Genymotion Cloud SaaS Android Devices.
           inputs:
           - instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
 
