@@ -52,11 +52,11 @@ run_if: ""
 
 deps:
   brew:
-  - name: git
-  - name: wget
+  - name: python3
+  - bin_name: pip3
   apt_get:
-  - name: git
-  - name: wget
+  - name: python3-pip
+  - bin_name: pip3
 
 
 toolkit:
