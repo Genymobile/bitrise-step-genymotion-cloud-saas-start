@@ -20,8 +20,8 @@ const (
 
 // Config ...
 type Config struct {
-	GMCloudSaaSEmail    string `env:"email,required"`
-	GMCloudSaaSPassword string `env:"password,required"`
+	GMCloudSaaSEmail    string          `env:"email,required"`
+	GMCloudSaaSPassword stepconf.Secret `env:"password,required"`
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
 	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
@@ -124,7 +124,7 @@ func main() {
 	ensureGMSAAS()
 	configureAndroidSDKPath()
 
-	login(c.GMCloudSaaSEmail, c.GMCloudSaaSPassword)
+	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
 	log.Infof("Start Android devices on Genymotion Cloud SaaS")
 	cmd := exec.Command("gmsaas", "instances", "start", c.GMCloudSaaSRecipeUUID, c.GMCloudSaaSInstanceName)
