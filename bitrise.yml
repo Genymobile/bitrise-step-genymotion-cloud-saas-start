@@ -13,7 +13,18 @@ app:
   - GMCLOUD_SAAS_PASSWORD: $GMCLOUD_SAAS_PASSWORD
 
 workflows:
+  ci:
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    # after_run:
+    #   - test
+
   test:
+    before_run:
+      - audit-this-step
     steps:
     - script:
         inputs:

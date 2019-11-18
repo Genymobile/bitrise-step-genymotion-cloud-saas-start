@@ -11,6 +11,7 @@ import (
 	"github.com/bitrise-tools/go-steputils/stepconf"
 )
 
+// Define Genymotion constants
 const (
 	GMCloudSaaSInstanceUUID          = "GMCLOUD_SAAS_INSTANCE_UUID"
 	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_INSTANCE_ADB_SERIAL_PORT"
@@ -48,10 +49,12 @@ func getInstanceDetails(name string) (string, string) {
 
 func getInstancesList() []string {
 	adminList := exec.Command("gmsaas", "instances", "list")
-	out, _ := adminList.StdoutPipe()
-	err := adminList.Start()
+	out, err := adminList.StdoutPipe()
 	if err != nil {
-		failf("Issue with gmssas command line: %s", err)
+		failf("Issue with gmsaas command line: %s", err)
+	}
+	if err := adminList.Start(); err != nil {
+		failf("Issue with gmsaas command line: %s", err)
 	}
 	// Create new Scanner.
 	scanner := bufio.NewScanner(out)
