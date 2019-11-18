@@ -70,7 +70,7 @@ inputs:
       title: Genymotion Cloud SaaS email
       summary: ""
       description: |-
-        Email of your Genymotion Cloud SaaS account
+        Email of your Genymotion Cloud SaaS account.
       is_required: true
 
   - password: ""
@@ -78,7 +78,7 @@ inputs:
       title: Genymotion Cloud SaaS password
       summary: ""
       description: |-
-        Password of your Genymotion Cloud SaaS account
+        Password of your Genymotion Cloud SaaS account.
       is_required: true
       is_sensitive: true
 
@@ -87,7 +87,7 @@ inputs:
       title: Recipe UUID
       summary: ""
       description: |-
-        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
+        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`.
       is_required: true
 
   - instance_name: ""
@@ -95,7 +95,7 @@ inputs:
       title: Instance name
       summary: ""
       description: |-
-        Name given to the newly created instance
+        Name given to the newly created instance.
       is_required: true
 
   - adb_serial_port: ""
@@ -103,9 +103,9 @@ inputs:
       title: ADB serial port
       summary: ""
       description: |-
-          If `adb_serial_port` option is set,
-          the instance will be connected to ADB on localhost:`adb_serial_port`.
-          Otherwise it will be connected to a port given by your system,
+          If `gmcloud_saas_adb_serial_port` option is set,  
+          the instance will be connected to ADB on localhost:`gmcloud_saas_adb_serial_port`.  
+          Otherwise it will be connected to a port given by your system,  
           `gmsaas instances list` to know which one.
 
 outputs:
@@ -113,9 +113,9 @@ outputs:
     opts:
       title: UUID of the instance connected
       description: |
-        Return the UUID of the instance started and connected
+        Return the UUID of the instance started and connected.
   - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port of the instance connected
       description: |
-        Return the ADB Serial Port of the instance started and connected
+        Return the ADB Serial Port of the instance started and connected.
