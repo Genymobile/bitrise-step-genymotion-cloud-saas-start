@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-tools/go-steputils/stepconf"
@@ -165,7 +166,7 @@ func main() {
 	}
 
 	for k, v := range outputs {
-		if err := exportEnvironmentWithEnvman(k, v); err != nil {
+		if err := tools.ExportEnvironmentWithEnvman(k, v); err != nil {
 			failf("Failed to export %s, error: %v", k, err)
 		}
 	}

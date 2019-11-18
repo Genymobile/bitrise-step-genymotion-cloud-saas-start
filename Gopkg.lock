@@ -3,6 +3,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:659157c334882ba37fe50584d691ea469fb6e708a49e81dcd4381fef6ba611b0"
+  name = "github.com/bitrise-io/go-steputils"
+  packages = ["tools"]
+  pruneopts = "UT"
+  revision = "3c98d95a94d51624a26e99419d0fc03d2aab0055"
+
+[[projects]]
+  branch = "master"
   digest = "1:9ab8a25451807dee966e317fbb5cd39e9acbb281248fd96b896c4971de8723c1"
   name = "github.com/bitrise-io/go-utils"
   packages = [
@@ -29,6 +37,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/bitrise-io/go-steputils/tools",
     "github.com/bitrise-io/go-utils/command",
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-tools/go-steputils/stepconf",
