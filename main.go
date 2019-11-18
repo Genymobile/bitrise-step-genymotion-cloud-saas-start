@@ -31,12 +31,16 @@ type Config struct {
 
 // install gmsaas if not installed.
 func ensureGMSAAS() error {
-	_, installed := os.LookupEnv("gmsaas")
-	if !installed {
+	path, err := exec.LookPath("gmsaas")
+	if err != nil {
+		log.Infof("Installing gmsaas ...")
 		cmd := command.New("pip3", "install", "gmsaas")
 		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
 			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
+		log.Infof("gmsaas has been installed.")
+	} else {
+		log.Infof("gmsaas is already installed : %s", path)
 	}
 	return nil
 }
