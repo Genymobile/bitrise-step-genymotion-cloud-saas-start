@@ -43,8 +43,8 @@ workflows:
         inputs:
         - email: $GMCLOUD_SAAS_EMAIL
         - password: $GMCLOUD_SAAS_PASSWORD
-        - instance_name: AndroidDeviceStartedByBitrise
-        - recipe_uuid: 107d757e-463a-4a18-8667-b8dec6e4c87e
+        - instance_name:
+        - recipe_uuid:
         - adb_serial_port:
     - script:
         inputs:
