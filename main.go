@@ -30,7 +30,7 @@ type Config struct {
 }
 
 // install gmsaas if not installed.
-func ensureGMSAAS() error {
+func ensureGMSAASisInstalled() error {
 	path, err := exec.LookPath("gmsaas")
 	if err != nil {
 		log.Infof("Installing gmsaas ...")
@@ -126,7 +126,9 @@ func main() {
 	}
 	stepconf.Print(c)
 
-	ensureGMSAAS()
+	if err := ensureGMSAASisInstalled(); err != nil {
+		failf("%s", err)
+	}
 	configureAndroidSDKPath()
 
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
