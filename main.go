@@ -112,12 +112,6 @@ func login(username, password string) {
 	}
 }
 
-func exportEnvironmentWithEnvman(keyStr, valueStr string) error {
-	cmd := command.New("envman", "add", "--key", keyStr)
-	cmd.SetStdin(strings.NewReader(valueStr))
-	return cmd.Run()
-}
-
 func main() {
 
 	var c Config
