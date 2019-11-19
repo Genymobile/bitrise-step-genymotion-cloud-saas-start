@@ -8,7 +8,7 @@
 # - Bitrise CLI guides: http://devcenter.bitrise.io/bitrise-cli/
 
 title: |-
-  genymotion-cloud-saas-start
+  Genymotion Cloud Start Android Devices
 summary: |
   Start Genymotion Cloud SaaS Android Devices
 description: |-
@@ -52,6 +52,7 @@ project_type_tags:
 # https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
 type_tags:
   - utility
+  - test
 
 is_requires_admin_user: true
 is_always_run: false
@@ -78,7 +79,7 @@ inputs:
       title: Genymotion Cloud SaaS email
       summary: ""
       description: |-
-        Email of your Genymotion Cloud SaaS account.
+        Email of your Genymotion Cloud SaaS account, if you don't have an account please create it first on [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
       is_required: true
 
   - password: ""
