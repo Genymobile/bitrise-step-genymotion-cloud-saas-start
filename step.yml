@@ -10,9 +10,17 @@
 title: |-
   genymotion-cloud-saas-start
 summary: |
-  Start Genymotion Cloud SaaS Android devices
-description: |
-  Start Genymotion Cloud SaaS Android devices
+  Start Genymotion Cloud SaaS Android Devices
+description: |-
+  This step launches Android devices on Genymotion Cloud SaaS.
+  Appium, Espresso, and others test automation frameworks can be run on those devices.
+  Setup instructions:
+  1. Create a Genymotion Cloud SaaS account: [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
+  1. Navigate to Default templates or templates:
+    - Select a device.
+    - Click on dot menu and select details.
+    - On the description field, get the recipe UUID.
+    - Copy paste it to use it in this step.
 website: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 source_code_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 support_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start/issues
@@ -103,8 +111,8 @@ inputs:
       title: ADB serial port
       summary: ""
       description: |-
-          If `gmcloud_saas_adb_serial_port` option is set,  
-          the instance will be connected to ADB on localhost:`gmcloud_saas_adb_serial_port`.  
+          If `adb_serial_port` option is set,  
+          the instance will be connected to ADB on localhost:`adb_serial_port`.  
           Otherwise it will be connected to a port given by your system,  
           `gmsaas instances list` to know which one.
 

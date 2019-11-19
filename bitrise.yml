@@ -39,8 +39,6 @@ workflows:
         - is_create_path: true
     - path::./:
         title: Genymotion Cloud SaaS Start
-        description: |-
-           Start Genymotion Cloud SaaS Android Devices.
         run_if: "true"
         inputs:
         - email: $GMCLOUD_SAAS_EMAIL
