@@ -52,7 +52,6 @@ project_type_tags:
 # https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
 type_tags:
   - utility
-  - test
 
 is_requires_admin_user: true
 is_always_run: false
