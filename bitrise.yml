@@ -19,8 +19,6 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
-    # after_run:
-    #   - test
 
   test:
     before_run:
