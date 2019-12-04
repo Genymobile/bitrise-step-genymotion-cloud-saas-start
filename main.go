@@ -16,7 +16,7 @@ import (
 // Define Genymotion constants
 const (
 	GMCloudSaaSInstanceUUID          = "GMCLOUD_SAAS_INSTANCE_UUID"
-	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_INSTANCE_ADB_SERIAL_PORT"
+	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT"
 )
 
 // Config ...
