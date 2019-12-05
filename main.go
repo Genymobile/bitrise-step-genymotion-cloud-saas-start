@@ -2,28 +2,47 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-tools/go-steputils/stepconf"
 )
 
+// Define Genymotion constants
 const (
 	GMCloudSaaSInstanceUUID          = "GMCLOUD_SAAS_INSTANCE_UUID"
-	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_INSTANCE_ADB_SERIAL_PORT"
+	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT"
 )
 
 // Config ...
 type Config struct {
-	GMCloudSaaSEmail    string `env:"gmcloud_saas_email,required"`
-	GMCloudSaaSPassword string `env:"gmcloud_saas_password,required"`
+	GMCloudSaaSEmail    string          `env:"email,required"`
+	GMCloudSaaSPassword stepconf.Secret `env:"password,required"`
 
-	GMCloudSaaSRecipeUUID    string `env:"gmcloud_saas_recipe_uuid,required"`
-	GMCloudSaaSInstanceName  string `env:"gmcloud_saas_instance_name,required"`
-	GMCloudSaaSAdbSerialPort string `env:"gmcloud_saas_adb_serial_port"`
+	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
+	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
+	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
+}
+
+// install gmsaas if not installed.
+func ensureGMSAASisInstalled() error {
+	path, err := exec.LookPath("gmsaas")
+	if err != nil {
+		log.Infof("Installing gmsaas ...")
+		cmd := command.New("pip3", "install", "gmsaas")
+		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		}
+		log.Infof("gmsaas has been installed.")
+	} else {
+		log.Infof("gmsaas is already installed : %s", path)
+	}
+	return nil
 }
 
 // failf prints an error and terminates the step.
@@ -48,10 +67,12 @@ func getInstanceDetails(name string) (string, string) {
 
 func getInstancesList() []string {
 	adminList := exec.Command("gmsaas", "instances", "list")
-	out, _ := adminList.StdoutPipe()
-	err := adminList.Start()
+	out, err := adminList.StdoutPipe()
 	if err != nil {
-		failf("Issue with gmssas command line: %s", err)
+		failf("Issue with gmsaas command line: %s", err)
+	}
+	if err := adminList.Start(); err != nil {
+		failf("Issue with gmsaas command line: %s", err)
 	}
 	// Create new Scanner.
 	scanner := bufio.NewScanner(out)
@@ -91,12 +112,6 @@ func login(username, password string) {
 	}
 }
 
-func exportEnvironmentWithEnvman(keyStr, valueStr string) error {
-	cmd := command.New("envman", "add", "--key", keyStr)
-	cmd.SetStdin(strings.NewReader(valueStr))
-	return cmd.Run()
-}
-
 func main() {
 
 	var c Config
@@ -105,9 +120,12 @@ func main() {
 	}
 	stepconf.Print(c)
 
+	if err := ensureGMSAASisInstalled(); err != nil {
+		failf("%s", err)
+	}
 	configureAndroidSDKPath()
 
-	login(c.GMCloudSaaSEmail, c.GMCloudSaaSPassword)
+	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
 	log.Infof("Start Android devices on Genymotion Cloud SaaS")
 	cmd := exec.Command("gmsaas", "instances", "start", c.GMCloudSaaSRecipeUUID, c.GMCloudSaaSInstanceName)
@@ -148,7 +166,7 @@ func main() {
 	}
 
 	for k, v := range outputs {
-		if err := exportEnvironmentWithEnvman(k, v); err != nil {
+		if err := tools.ExportEnvironmentWithEnvman(k, v); err != nil {
 			failf("Failed to export %s, error: %v", k, err)
 		}
 	}

@@ -10,9 +10,17 @@
 title: |-
   Genymotion Cloud Start Android Devices
 summary: |
-  Start Genymotion Cloud SaaS instances
-description: |
-  Start Genymotion Cloud SaaS instances, you need to create an account first on [https://cloud.geny.io](https://cloud.geny.io)
+  Start Genymotion Cloud SaaS Android Devices
+description: |-
+  This step launches Android devices on Genymotion Cloud SaaS.
+  Appium, Espresso, and others test automation frameworks can be run on those devices.
+  Setup instructions:
+  1. Create a Genymotion Cloud SaaS account: [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
+  1. Navigate to Default templates or templates:
+    - Select a device.
+    - Click on dot menu and select details.
+    - On the description field, get the recipe UUID.
+    - Copy paste it to use it in this step.
 website: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 source_code_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start
 support_url: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start/issues
@@ -33,17 +41,17 @@ project_type_tags:
 #   - ios
 #   - macos
   - android
-#   - xamarin
-#   - react-native
-#   - cordova
-#   - ionic
+  - xamarin
+  - react-native
+  - cordova
+  - ionic
+  - flutter
 
 # Type tags are used for categorizing steps, for easier step discovery in Step Libraries.
 # You can find more information about type tags in the Step Development Guideline:
 # https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
 type_tags:
   - utility
-  - test
 
 is_requires_admin_user: true
 is_always_run: false
@@ -52,11 +60,11 @@ run_if: ""
 
 deps:
   brew:
-  - name: git
-  - name: wget
+  - name: python3
+  - bin_name: pip3
   apt_get:
-  - name: git
-  - name: wget
+  - name: python3-pip
+  - bin_name: pip3
 
 
 toolkit:
@@ -65,46 +73,47 @@ toolkit:
 
 
 inputs:
-  - gmcloud_saas_email: ""
+  - email: ""
     opts:
       title: Genymotion Cloud SaaS email
       summary: ""
       description: |-
-        Email of your Genymotion Cloud SaaS account, if you don't have an account please create it first on [https://cloud.geny.io](https://cloud.geny.io)
+        Email of your Genymotion Cloud SaaS account, if you don't have an account please create it first on [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
       is_required: true
 
-  - gmcloud_saas_password: ""
+  - password: ""
     opts:
       title: Genymotion Cloud SaaS password
       summary: ""
       description: |-
-        Password of your Genymotion Cloud SaaS account
+        Password of your Genymotion Cloud SaaS account.
       is_required: true
+      is_sensitive: true
 
-  - gmcloud_saas_recipe_uuid: ""
+  - recipe_uuid: ""
     opts:
       title: Recipe UUID
       summary: ""
       description: |-
-        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
+        Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`.
       is_required: true
 
-  - gmcloud_saas_instance_name: ""
+  - instance_name: ""
     opts:
       title: Instance name
       summary: ""
       description: |-
-        Name given to the newly created instance
+        Name given to the newly created instance.
       is_required: true
 
-  - gmcloud_saas_adb_serial_port: ""
+  - adb_serial_port: ""
     opts:
       title: ADB serial port
       summary: ""
       description: |-
-          If `gmcloud_saas_adb_serial_port` option is set,
-          the instance will be connected to ADB on localhost:`gmcloud_saas_adb_serial_port`.
-          Otherwise it will be connected to a port given by your system,
+          If `adb_serial_port` option is set,  
+          the instance will be connected to ADB on localhost:`adb_serial_port`.  
+          Otherwise it will be connected to a port given by your system,  
           `gmsaas instances list` to know which one.
 
 outputs:
@@ -112,9 +121,9 @@ outputs:
     opts:
       title: UUID of the instance connected
       description: |
-        Return the UUID of the instance started and connected
+        Return the UUID of the instance started and connected.
   - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port of the instance connected
       description: |
-        Return the ADB Serial Port of the instance started and connected
+        Return the ADB Serial Port of the instance started and connected.
