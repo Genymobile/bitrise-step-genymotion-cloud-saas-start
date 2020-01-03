@@ -125,6 +125,10 @@ func main() {
 	}
 	configureAndroidSDKPath()
 
+	if err := tools.ExportEnvironmentWithEnvman("GMSAAS_USER_AGENT_EXTRA_DATA", "bitrise.io"); err != nil {
+		failf("Failed to export %s, error: %v", "GMSAAS_USER_AGENT_EXTRA_DATA", err)
+	}
+
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
 	log.Infof("Start Android devices on Genymotion Cloud SaaS")
