@@ -7,7 +7,7 @@ app:
   - BITRISE_STEP_ID: genymotion-cloud-saas-start
   - BITRISE_STEP_VERSION: "0.0.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-start.git
-  - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
+  - MY_STEPLIB_REPO_FORK_GIT_URL: https://github.com/Genymobile/bitrise-steplib
   # Define these in your .bitrise.secrets.yml
   - GMCLOUD_SAAS_EMAIL: $GMCLOUD_SAAS_EMAIL
   - GMCLOUD_SAAS_PASSWORD: $GMCLOUD_SAAS_PASSWORD
@@ -50,7 +50,7 @@ workflows:
             #!/bin/bash
             echo "The value of 'GMCLOUD_SAAS_INSTANCE_UUID' is: $GMCLOUD_SAAS_INSTANCE_UUID
             echo "The value of 'GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
-    - path::../bitrise-step-genymotion-cloud-saas-stop:
+    - git::https://github.com/Genymobile/bitrise-step-genymotion-cloud-saas-stop.git:
           title: "Genymotion Cloud SaaS Stop"
           description: |-
            Stop Genymotion Cloud SaaS Android Devices.
