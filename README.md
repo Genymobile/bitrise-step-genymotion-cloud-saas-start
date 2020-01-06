@@ -2,6 +2,9 @@
 
 Start Genymotion Cloud SaaS Android devices
 
+## Prerequisite
+
+Go to  [Genymotion Cloud SaaS](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=github&utm_campaign=bitrise&utm_content=signup) and create an account
 
 ## How to use this Step
 
@@ -27,39 +30,32 @@ An example `.bitrise.secrets.yml` file:
 
 ```
 envs:
-- A_SECRET_PARAM_ONE: the value for secret one
-- A_SECRET_PARAM_TWO: the value for secret two
+- GMCLOUD_SAAS_EMAIL: [YOUR_GENYMOTION_CLOUD_EMAIL]
+- GMCLOUD_SAAS_PASSWORD: [YOUR_GENYMOTION_CLOUD_PASSWORD]
 ```
 
-## How to create your own step
+## How to setup Bitrise.yml
 
-1. Create a new git repository for your step (**don't fork** the *step template*, create a *new* repository)
-2. Copy the [step template](https://github.com/bitrise-steplib/step-template) files into your repository
-3. Fill the `step.sh` with your functionality
-4. Wire out your inputs to `step.yml` (`inputs` section)
-5. Fill out the other parts of the `step.yml` too
-6. Provide test values for the inputs in the `bitrise.yml`
-7. Run your step with `bitrise run test` - if it works, you're ready
+This step take three inputs :
+  * `recipe_uuid`: Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`
+  * `instance_name`: Name given to the newly created instance.
+  * `adb_serial_port` (default value: None): port which the instance will be connected to ADB
 
-__For Step development guidelines & best practices__ check this documentation: [https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md](https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md).
-
-**NOTE:**
-
-If you want to use your step in your project's `bitrise.yml`:
-
-1. git push the step into it's repository
-2. reference it in your `bitrise.yml` with the `git::PUBLIC-GIT-CLONE-URL@BRANCH` step reference style:
+Example: 
 
 ```
-- git::https://github.com/user/my-step.git@branch:
-   title: My step
-   inputs:
-   - my_input_1: "my value 1"
-   - my_input_2: "my value 2"
+  inputs:
+    - email: $GMCLOUD_SAAS_EMAIL
+    - password: $GMCLOUD_SAAS_PASSWORD
+    - instance_name: DeviceStartedByBitrise
+    - recipe_uuid: e20da1a3-313c-434a-9d43-7268b12fee08
+    - adb_serial_port: 4321
 ```
+## See also
 
-You can find more examples of step reference styles
-in the [bitrise CLI repository](https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml#L65).
+This step is part of a series of Bitrise steps which integrate Genymotion Cloud SaaS with Bitrise.
+
+ * Use the [Stop Genymotion Cloud SaaS android devices](https://github.com/genymobile/bitrise-step-genymotion-cloud-saas-stop.git) step to stop your Android devices to Genymotion Cloud SaaS.
 
 ## How to contribute to this Step
 
@@ -76,18 +72,3 @@ in the [bitrise CLI repository](https://github.com/bitrise-io/bitrise/blob/maste
   * You can find more example of alternative step referencing at: https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml
 7. Once you're done just commit your changes & create a Pull Request
 
-
-## Share your own Step
-
-You can share your Step or step version with the [bitrise CLI](https://github.com/bitrise-io/bitrise). If you use the `bitrise.yml` included in this repository, all you have to do is:
-
-1. In your Terminal / Command Line `cd` into this directory (where the `bitrise.yml` of the step is located)
-1. Run: `bitrise run test` to test the step
-1. Run: `bitrise run audit-this-step` to audit the `step.yml`
-1. Check the `share-this-step` workflow in the `bitrise.yml`, and fill out the
-   `envs` if you haven't done so already (don't forget to bump the version number if this is an update
-   of your step!)
-1. Then run: `bitrise run share-this-step` to share the step (version) you specified in the `envs`
-1. Send the Pull Request, as described in the logs of `bitrise run share-this-step`
-
-That's all ;)
