@@ -113,7 +113,6 @@ func login(username, password string) {
 }
 
 func startInstanceAndConnect(recipeUUID, instanceName, adbSerialPort string) (string, string) {
-	log.Infof("Start Android devices on Genymotion Cloud SaaS")
 	cmd := exec.Command("gmsaas", "instances", "start", recipeUUID, instanceName)
 	stdout, err := cmd.CombinedOutput()
 	if err != nil {
@@ -170,9 +169,13 @@ func main() {
 	instancesList := []string{}
 	adbserialList := []string{}
 
-	for compteur := 0; compteur < 2; compteur++ {
-		instanceName := fmt.Sprint("gminstance_bitrise_", compteur)
-		instanceUUID, InstanceADBSerialPort := startInstanceAndConnect(c.GMCloudSaaSRecipeUUID, instanceName, c.GMCloudSaaSAdbSerialPort)
+	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
+	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
+
+	log.Infof("Start Android devices on Genymotion Cloud SaaS")
+	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
+		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
+		instanceUUID, InstanceADBSerialPort := startInstanceAndConnect(recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
 		instancesList = append(instancesList, instanceUUID)
 		adbserialList = append(adbserialList, InstanceADBSerialPort)
 	}
