@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
@@ -112,7 +113,9 @@ func login(username, password string) {
 	}
 }
 
-func startInstanceAndConnect(recipeUUID, instanceName, adbSerialPort string) (string, string) {
+func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) (string, string) {
+	defer wg.Done()
+
 	cmd := exec.Command("gmsaas", "instances", "start", recipeUUID, instanceName)
 	stdout, err := cmd.CombinedOutput()
 	if err != nil {
@@ -143,7 +146,6 @@ func startInstanceAndConnect(recipeUUID, instanceName, adbSerialPort string) (st
 	}
 
 	uuid, serialport := getInstanceDetails(instanceName)
-
 	return uuid, serialport
 }
 
@@ -172,14 +174,20 @@ func main() {
 	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
 	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
 
-	log.Infof("Start Android devices on Genymotion Cloud SaaS")
+	log.Infof("Start %s Android devices on Genymotion Cloud SaaS", len(recipesList))
+	var wg sync.WaitGroup
 	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
 		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
-		instanceUUID, InstanceADBSerialPort := startInstanceAndConnect(recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
-		instancesList = append(instancesList, instanceUUID)
-		adbserialList = append(adbserialList, InstanceADBSerialPort)
+		wg.Add(1)
+		if len(adbSerialPortList) > 1 {
+			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
+		} else {
+			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, "")
+		}
+		// instancesList = append(instancesList, instanceUUID)
+		// adbserialList = append(adbserialList, InstanceADBSerialPort)
 	}
-
+	wg.Wait()
 	log.Infof("instancesList %s", instancesList)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
