@@ -54,7 +54,7 @@ func failf(format string, args ...interface{}) {
 func getInstanceDetails(name string) (string, string) {
 	for index, line := range getInstancesList() {
 		if index >= 2 {
-			s := strings.Split(line, "  ")
+			s := strings.Fields(line)
 			if strings.Compare(s[1], name) == 0 {
 				uuid := s[0]
 				serial := s[2]
@@ -112,6 +112,42 @@ func login(username, password string) {
 	}
 }
 
+func startInstanceAndConnect(recipeUUID, instanceName, adbSerialPort string) (string, string) {
+	log.Infof("Start Android devices on Genymotion Cloud SaaS")
+	cmd := exec.Command("gmsaas", "instances", "start", recipeUUID, instanceName)
+	stdout, err := cmd.CombinedOutput()
+	if err != nil {
+		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
+	} else {
+		log.Infof("Device started %s", stdout)
+	}
+
+	instanceUUID := strings.TrimRight(string(stdout), "\n")
+
+	// Connect to adb with adb-serial-port
+	if adbSerialPort != "" {
+		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
+			log.Errorf("Device stopped %s", instanceUUID)
+			failf("Error: %s", output)
+		}
+	} else {
+		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
+			log.Errorf("Device stopped %s", instanceUUID)
+			failf("Error: %s", output)
+		}
+	}
+
+	uuid, serialport := getInstanceDetails(instanceName)
+
+	return uuid, serialport
+}
+
 func main() {
 
 	var c Config
@@ -131,42 +167,22 @@ func main() {
 
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
-	log.Infof("Start Android devices on Genymotion Cloud SaaS")
-	cmd := exec.Command("gmsaas", "instances", "start", c.GMCloudSaaSRecipeUUID, c.GMCloudSaaSInstanceName)
-	stdout, err := cmd.CombinedOutput()
-	if err != nil {
-		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
-	} else {
-		log.Infof("Device started %s", stdout)
+	instancesList := []string{}
+	adbserialList := []string{}
+
+	for compteur := 0; compteur < 2; compteur++ {
+		instanceName := fmt.Sprint("gminstance_bitrise_", compteur)
+		instanceUUID, InstanceADBSerialPort := startInstanceAndConnect(c.GMCloudSaaSRecipeUUID, instanceName, c.GMCloudSaaSAdbSerialPort)
+		instancesList = append(instancesList, instanceUUID)
+		adbserialList = append(adbserialList, InstanceADBSerialPort)
 	}
 
-	instanceUUID := strings.TrimRight(string(stdout), "\n")
-
-	// Connect to adb with adb-serial-port
-	if c.GMCloudSaaSAdbSerialPort != "" {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", c.GMCloudSaaSAdbSerialPort)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
-		}
-	} else {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
-		}
-	}
-
-	_, InstanceADBSerialPort := getInstanceDetails(c.GMCloudSaaSInstanceName)
+	log.Infof("instancesList %s", instancesList)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
-		GMCloudSaaSInstanceUUID:          instanceUUID,
-		GMCloudSaaSInstanceADBSerialPort: InstanceADBSerialPort,
+		GMCloudSaaSInstanceUUID:          strings.Join(instancesList, ","),
+		GMCloudSaaSInstanceADBSerialPort: strings.Join(adbserialList, ","),
 	}
 
 	for k, v := range outputs {
