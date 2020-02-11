@@ -111,11 +111,11 @@ inputs:
 outputs:
   - GMCLOUD_SAAS_INSTANCE_UUID:
     opts:
-      title: UUID of the instance connected
+      title: UUID list of started and connected instances
       description: |
-        Return the UUID of the instance started and connected.
+        Return a UUID list of started and connected instances.
   - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
-      title: ADB Serial Port of the instance connected
+      title: ADB Serial Port list of connected instances
       description: |
-        Return the ADB Serial Port of the instance started and connected.
+        Return an ADB Serial Port list of connected instances.
