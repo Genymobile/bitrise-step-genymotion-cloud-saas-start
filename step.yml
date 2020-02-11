@@ -98,7 +98,7 @@ inputs:
         Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`.
 
         Format:
-        You can specify several recipe UUIDs in order to start several instances. Recipe UUIDs are separated with ','
+        You can specify several recipe UUIDs in order to start several instances. Recipe UUIDs are separated with a comma.
         
         For example:
         `e20da1a3-313c-434a-9d43-7268b12fee08,c52fdfc2-6914-4266-aa6e-50258f50ef91,06867de4-4b99-4842-ba40-fd3daaabdf23`
@@ -118,7 +118,7 @@ inputs:
           `gmsaas instances list` to know which one.
 
           Format:
-          You can specify several ADB Serial ports. ADB Serial ports are separated with ','
+          You can specify several ADB Serial ports. ADB Serial ports are separated with a comma.
 
           For example:
           `4321,4322,4323`
@@ -128,7 +128,7 @@ outputs:
     opts:
       title: UUID list of started and connected instances
       description: |
-        Return an UUID list of started and connected instances.
+        Return the UUID list of started and connected instances.
   - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port list of connected instances

@@ -159,7 +159,7 @@ func main() {
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
 	instancesList := []string{}
-	adbserialList := []string{}
+	adbSerialList := []string{}
 
 	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
 	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
@@ -183,15 +183,13 @@ func main() {
 		instanceUUID, InstanceADBSerialPort := getInstanceDetails(instanceName)
 
 		instancesList = append(instancesList, instanceUUID)
-		adbserialList = append(adbserialList, InstanceADBSerialPort)
+		adbSerialList = append(adbSerialList, InstanceADBSerialPort)
 	}
-
-	log.Debugf("instancesList %s", instancesList)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
 		GMCloudSaaSInstanceUUID:          strings.Join(instancesList, ","),
-		GMCloudSaaSInstanceADBSerialPort: strings.Join(adbserialList, ","),
+		GMCloudSaaSInstanceADBSerialPort: strings.Join(adbSerialList, ","),
 	}
 
 	for k, v := range outputs {
