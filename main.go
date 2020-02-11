@@ -92,10 +92,10 @@ func configureAndroidSDKPath() {
 
 	value, exists := os.LookupEnv("ANDROID_HOME")
 	if exists {
-		cmd := exec.Command("gmsaas", "config", "set", "android-sdk-path", value)
-		stdout, err := cmd.CombinedOutput()
+		cmd := command.New("gmsaas", "config", "set", "android-sdk-path", value)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			failf("Fail to set android-sdk-path, error: %#v | output: %s", err, stdout)
+			failf("Failed to set android-sdk-path, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
 		log.Infof("Android SDK is configured")
 	} else {
@@ -105,48 +105,39 @@ func configureAndroidSDKPath() {
 
 func login(username, password string) {
 	log.Infof("Login Genymotion Account")
-	cmd, err := exec.Command("gmsaas", "auth", "login", username, password).CombinedOutput()
+	cmd := command.New("gmsaas", "auth", "login", username, password)
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		failf("Failed to log with gmsaas, error: %#v | output: %s", err, cmd)
-	} else {
-		log.Infof("Logged to Genymotion Cloud SaaS platform")
+		failf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 	}
+	log.Infof("Logged to Genymotion Cloud SaaS platform")
 }
 
-func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) (string, string) {
+func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) {
 	defer wg.Done()
 
-	cmd := exec.Command("gmsaas", "instances", "start", recipeUUID, instanceName)
-	stdout, err := cmd.CombinedOutput()
+	cmd := command.New("gmsaas", "instances", "start", recipeUUID, instanceName)
+	instanceUUID, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
-	} else {
-		log.Infof("Device started %s", stdout)
+		failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, instanceUUID)
 	}
 
-	instanceUUID := strings.TrimRight(string(stdout), "\n")
+	log.Infof("Device started %s", instanceUUID)
 
 	// Connect to adb with adb-serial-port
 	if adbSerialPort != "" {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
-		output, err := cmd.CombinedOutput()
+		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
+			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
 	} else {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID)
-		output, err := cmd.CombinedOutput()
+		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
+			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
 	}
-
-	uuid, serialport := getInstanceDetails(instanceName)
-	return uuid, serialport
 }
 
 func main() {
@@ -174,7 +165,7 @@ func main() {
 	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
 	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
 
-	log.Infof("Start %s Android devices on Genymotion Cloud SaaS", len(recipesList))
+	log.Infof("Start %d Android instances on Genymotion Cloud SaaS", len(recipesList))
 	var wg sync.WaitGroup
 	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
 		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
@@ -184,11 +175,19 @@ func main() {
 		} else {
 			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, "")
 		}
-		// instancesList = append(instancesList, instanceUUID)
-		// adbserialList = append(adbserialList, InstanceADBSerialPort)
 	}
 	wg.Wait()
-	log.Infof("instancesList %s", instancesList)
+
+	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
+
+		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
+		instanceUUID, InstanceADBSerialPort := getInstanceDetails(instanceName)
+
+		instancesList = append(instancesList, instanceUUID)
+		adbserialList = append(adbserialList, InstanceADBSerialPort)
+	}
+
+	log.Debugf("instancesList %s", instancesList)
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
