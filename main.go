@@ -26,7 +26,6 @@ type Config struct {
 	GMCloudSaaSPassword stepconf.Secret `env:"password,required"`
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
-	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
 }
 

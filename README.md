@@ -38,7 +38,6 @@ envs:
 
 This step takes three inputs:
   * `recipe_uuid`: Recipe UUID is the identifier used when starting an instance; it can be retrieved using `gmsaas recipes list`
-  * `instance_name`: Name given to the newly created instance.
   * `adb_serial_port` (default value: None): port which the instance will be connected to ADB
 
 Example: 
@@ -47,7 +46,6 @@ Example:
   inputs:
     - email: $GMCLOUD_SAAS_EMAIL
     - password: $GMCLOUD_SAAS_PASSWORD
-    - instance_name: DeviceStartedByBitrise
     - recipe_uuid: e20da1a3-313c-434a-9d43-7268b12fee08
     - adb_serial_port: 4321
 ```

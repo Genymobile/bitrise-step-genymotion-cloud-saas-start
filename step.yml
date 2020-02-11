@@ -98,14 +98,6 @@ inputs:
         Recipe UUID is the identifier used when starting an instance, Recipe UUID can be retrieved using `gmsaas recipes list`.
       is_required: true
 
-  - instance_name: ""
-    opts:
-      title: Instance name
-      summary: ""
-      description: |-
-        Name given to the newly created instance.
-      is_required: true
-
   - adb_serial_port: ""
     opts:
       title: ADB serial port
