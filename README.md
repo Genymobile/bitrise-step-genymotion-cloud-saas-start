@@ -42,12 +42,22 @@ This step takes three inputs:
 
 Example: 
 
+* Start single instance: 
 ```
   inputs:
     - email: $GMCLOUD_SAAS_EMAIL
     - password: $GMCLOUD_SAAS_PASSWORD
     - recipe_uuid: e20da1a3-313c-434a-9d43-7268b12fee08
     - adb_serial_port: 4321
+```
+
+* Start several instances: 
+```
+  inputs:
+    - email: $GMCLOUD_SAAS_EMAIL
+    - password: $GMCLOUD_SAAS_PASSWORD
+    - recipe_uuid: e20da1a3-313c-434a-9d43-7268b12fee08,c52fdfc2-6914-4266-aa6e-50258f50ef91,06867de4-4b99-4842-ba40-fd3daaabdf23
+    - adb_serial_port: 4321,4324,4325
 ```
 ## See also
 
