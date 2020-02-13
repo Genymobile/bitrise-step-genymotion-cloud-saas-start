@@ -41,7 +41,6 @@ workflows:
         inputs:
         - email: $GMCLOUD_SAAS_EMAIL
         - password: $GMCLOUD_SAAS_PASSWORD
-        - instance_name:
         - recipe_uuid:
         - adb_serial_port:
     - script:

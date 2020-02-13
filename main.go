@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
@@ -25,7 +26,6 @@ type Config struct {
 	GMCloudSaaSPassword stepconf.Secret `env:"password,required"`
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
-	GMCloudSaaSInstanceName  string `env:"instance_name,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
 }
 
@@ -54,7 +54,7 @@ func failf(format string, args ...interface{}) {
 func getInstanceDetails(name string) (string, string) {
 	for index, line := range getInstancesList() {
 		if index >= 2 {
-			s := strings.Split(line, "  ")
+			s := strings.Fields(line)
 			if strings.Compare(s[1], name) == 0 {
 				uuid := s[0]
 				serial := s[2]
@@ -91,10 +91,10 @@ func configureAndroidSDKPath() {
 
 	value, exists := os.LookupEnv("ANDROID_HOME")
 	if exists {
-		cmd := exec.Command("gmsaas", "config", "set", "android-sdk-path", value)
-		stdout, err := cmd.CombinedOutput()
+		cmd := command.New("gmsaas", "config", "set", "android-sdk-path", value)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			failf("Fail to set android-sdk-path, error: %#v | output: %s", err, stdout)
+			failf("Failed to set android-sdk-path, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
 		log.Infof("Android SDK is configured")
 	} else {
@@ -104,11 +104,38 @@ func configureAndroidSDKPath() {
 
 func login(username, password string) {
 	log.Infof("Login Genymotion Account")
-	cmd, err := exec.Command("gmsaas", "auth", "login", username, password).CombinedOutput()
+	cmd := command.New("gmsaas", "auth", "login", username, password)
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		failf("Failed to log with gmsaas, error: %#v | output: %s", err, cmd)
+		failf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+	}
+	log.Infof("Logged to Genymotion Cloud SaaS platform")
+}
+
+func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) {
+	defer wg.Done()
+
+	cmd := command.New("gmsaas", "instances", "start", recipeUUID, instanceName)
+	instanceUUID, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, instanceUUID)
+	}
+
+	log.Infof("Device started %s", instanceUUID)
+
+	// Connect to adb with adb-serial-port
+	if adbSerialPort != "" {
+		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+		if err != nil {
+			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		}
 	} else {
-		log.Infof("Logged to Genymotion Cloud SaaS platform")
+		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID)
+		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+		if err != nil {
+			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		}
 	}
 }
 
@@ -131,42 +158,38 @@ func main() {
 
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
 
-	log.Infof("Start Android devices on Genymotion Cloud SaaS")
-	cmd := exec.Command("gmsaas", "instances", "start", c.GMCloudSaaSRecipeUUID, c.GMCloudSaaSInstanceName)
-	stdout, err := cmd.CombinedOutput()
-	if err != nil {
-		failf("Failed to start a device, error: %#v | output: %s", err, stdout)
-	} else {
-		log.Infof("Device started %s", stdout)
-	}
+	instancesList := []string{}
+	adbSerialList := []string{}
 
-	instanceUUID := strings.TrimRight(string(stdout), "\n")
+	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
+	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
 
-	// Connect to adb with adb-serial-port
-	if c.GMCloudSaaSAdbSerialPort != "" {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", c.GMCloudSaaSAdbSerialPort)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
-		}
-	} else {
-		cmd := exec.Command("gmsaas", "instances", "adbconnect", instanceUUID)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			cmd = exec.Command("gmsaas", "instances", "stop", instanceUUID)
-			log.Errorf("Device stopped %s", instanceUUID)
-			failf("Error: %s", output)
+	log.Infof("Start %d Android instances on Genymotion Cloud SaaS", len(recipesList))
+	var wg sync.WaitGroup
+	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
+		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
+		wg.Add(1)
+		if len(adbSerialPortList) > 1 {
+			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
+		} else {
+			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, "")
 		}
 	}
+	wg.Wait()
 
-	_, InstanceADBSerialPort := getInstanceDetails(c.GMCloudSaaSInstanceName)
+	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
+
+		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
+		instanceUUID, InstanceADBSerialPort := getInstanceDetails(instanceName)
+
+		instancesList = append(instancesList, instanceUUID)
+		adbSerialList = append(adbSerialList, InstanceADBSerialPort)
+	}
 
 	// --- Step Outputs: Export Environment Variables for other Steps:
 	outputs := map[string]string{
-		GMCloudSaaSInstanceUUID:          instanceUUID,
-		GMCloudSaaSInstanceADBSerialPort: InstanceADBSerialPort,
+		GMCloudSaaSInstanceUUID:          strings.Join(instancesList, ","),
+		GMCloudSaaSInstanceADBSerialPort: strings.Join(adbSerialList, ","),
 	}
 
 	for k, v := range outputs {
