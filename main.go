@@ -20,6 +20,9 @@ const (
 	GMCloudSaaSInstanceADBSerialPort = "GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT"
 )
 
+// Define variable
+var isError bool = false
+
 // Config ...
 type Config struct {
 	GMCloudSaaSEmail    string          `env:"email,required"`
@@ -45,10 +48,10 @@ func ensureGMSAASisInstalled() error {
 	return nil
 }
 
-// failf prints an error and terminates the step.
+// failf prints an error.
 func failf(format string, args ...interface{}) {
 	log.Errorf(format, args...)
-	os.Exit(1)
+	isError = true
 }
 
 func getInstanceDetails(name string) (string, string) {
@@ -202,5 +205,9 @@ func main() {
 	// The exit code of your Step is very important. If you return
 	//  with a 0 exit code `bitrise` will register your Step as "successful".
 	// Any non zero exit code will be registered as "failed" by `bitrise`.
+	if isError {
+		// If at least one error happens, step will fail
+		os.Exit(1)
+	}
 	os.Exit(0)
 }
