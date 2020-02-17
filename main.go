@@ -54,6 +54,12 @@ func failf(format string, args ...interface{}) {
 	isError = true
 }
 
+// errorf prints an error and terminates step
+func errorf(format string, args ...interface{}) {
+	log.Errorf(format, args...)
+	os.Exit(1)
+}
+
 func getInstanceDetails(name string) (string, string) {
 	for index, line := range getInstancesList() {
 		if index >= 2 {
@@ -110,7 +116,7 @@ func login(username, password string) {
 	cmd := command.New("gmsaas", "auth", "login", username, password)
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		failf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		errorf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 	}
 	log.Infof("Logged to Genymotion Cloud SaaS platform")
 }
@@ -146,12 +152,12 @@ func main() {
 
 	var c Config
 	if err := stepconf.Parse(&c); err != nil {
-		failf("Issue with input: %s", err)
+		errorf("Issue with input: %s", err)
 	}
 	stepconf.Print(c)
 
 	if err := ensureGMSAASisInstalled(); err != nil {
-		failf("%s", err)
+		errorf("%s", err)
 	}
 	configureAndroidSDKPath()
 
