@@ -37,7 +37,7 @@ func ensureGMSAASisInstalled() error {
 	path, err := exec.LookPath("gmsaas")
 	if err != nil {
 		log.Infof("Installing gmsaas ...")
-		cmd := command.New("pip3", "install", "gmsas")
+		cmd := command.New("pip3", "install", "gmsaas")
 		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
 			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
@@ -145,7 +145,6 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 
 	// Connect to adb with adb-serial-port
 	if adbSerialPort != "" {
-		log.Infof("adbserial %s", adbSerialPort)
 		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
