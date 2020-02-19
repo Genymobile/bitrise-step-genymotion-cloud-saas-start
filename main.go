@@ -37,7 +37,7 @@ func ensureGMSAASisInstalled() error {
 	path, err := exec.LookPath("gmsaas")
 	if err != nil {
 		log.Infof("Installing gmsaas ...")
-		cmd := command.New("pip3", "install", "gmsaas")
+		cmd := command.New("pip3", "install", "gmsas")
 		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
 			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 		}
@@ -48,16 +48,21 @@ func ensureGMSAASisInstalled() error {
 	return nil
 }
 
-// failf prints an error.
-func failf(format string, args ...interface{}) {
+// printError prints an error.
+func printError(format string, args ...interface{}) {
 	log.Errorf(format, args...)
-	isError = true
 }
 
-// errorf prints an error and terminates step
-func errorf(format string, args ...interface{}) {
-	log.Errorf(format, args...)
+// abortf prints an error and terminates step
+func abortf(format string, args ...interface{}) {
+	printError(format, args...)
 	os.Exit(1)
+}
+
+// setOperationFailed marked step as failed
+func setOperationFailed(format string, args ...interface{}) {
+	printError(format, args...)
+	isError = true
 }
 
 func getInstanceDetails(name string) (string, string) {
@@ -75,17 +80,20 @@ func getInstanceDetails(name string) (string, string) {
 }
 
 func getInstancesList() []string {
+	result := []string{}
+
 	adminList := exec.Command("gmsaas", "instances", "list")
 	out, err := adminList.StdoutPipe()
 	if err != nil {
-		failf("Issue with gmsaas command line: %s", err)
+		setOperationFailed("Issue with gmsaas command line: %s", err)
+		return result
 	}
 	if err := adminList.Start(); err != nil {
-		failf("Issue with gmsaas command line: %s", err)
+		setOperationFailed("Issue with gmsaas command line: %s", err)
+		return result
 	}
 	// Create new Scanner.
 	scanner := bufio.NewScanner(out)
-	result := []string{}
 	// Use Scan.
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -103,11 +111,13 @@ func configureAndroidSDKPath() {
 		cmd := command.New("gmsaas", "config", "set", "android-sdk-path", value)
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			failf("Failed to set android-sdk-path, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to set android-sdk-path, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			return
 		}
 		log.Infof("Android SDK is configured")
 	} else {
-		failf("Please set ANDROID_HOME environment variable")
+		setOperationFailed("Please set ANDROID_HOME environment variable")
+		return
 	}
 }
 
@@ -116,7 +126,7 @@ func login(username, password string) {
 	cmd := command.New("gmsaas", "auth", "login", username, password)
 	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		errorf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
 	}
 	log.Infof("Logged to Genymotion Cloud SaaS platform")
 }
@@ -127,23 +137,27 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 	cmd := command.New("gmsaas", "instances", "start", recipeUUID, instanceName)
 	instanceUUID, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, instanceUUID)
+		setOperationFailed("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, instanceUUID)
+		return
 	}
 
 	log.Infof("Device started %s", instanceUUID)
 
 	// Connect to adb with adb-serial-port
 	if adbSerialPort != "" {
+		log.Infof("adbserial %s", adbSerialPort)
 		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			return
 		}
 	} else {
 		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID)
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			failf("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			return
 		}
 	}
 }
@@ -152,17 +166,17 @@ func main() {
 
 	var c Config
 	if err := stepconf.Parse(&c); err != nil {
-		errorf("Issue with input: %s", err)
+		abortf("Issue with input: %s", err)
 	}
 	stepconf.Print(c)
 
 	if err := ensureGMSAASisInstalled(); err != nil {
-		errorf("%s", err)
+		abortf("%s", err)
 	}
 	configureAndroidSDKPath()
 
 	if err := tools.ExportEnvironmentWithEnvman("GMSAAS_USER_AGENT_EXTRA_DATA", "bitrise.io"); err != nil {
-		failf("Failed to export %s, error: %v", "GMSAAS_USER_AGENT_EXTRA_DATA", err)
+		printError("Failed to export %s, error: %v", "GMSAAS_USER_AGENT_EXTRA_DATA", err)
 	}
 
 	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
@@ -203,7 +217,7 @@ func main() {
 
 	for k, v := range outputs {
 		if err := tools.ExportEnvironmentWithEnvman(k, v); err != nil {
-			failf("Failed to export %s, error: %v", k, err)
+			abortf("Failed to export %s, error: %v", k, err)
 		}
 	}
 
