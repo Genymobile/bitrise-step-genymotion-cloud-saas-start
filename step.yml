@@ -127,10 +127,13 @@ outputs:
   - GMCLOUD_SAAS_INSTANCE_UUID:
     opts:
       title: UUID list of started and connected instances
-      description: |
-        Return the UUID list of started and connected instances.
+      description: |-
+        This output will include the instances UUIDs of started and connected instances.
+        The UUIDs are separated with a comma, eg: `594d606a-e6f7-43e1-99ac-77e07738a6dc,18e75e62-534e-4407-9700-564d767d6578`
   - GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT:
     opts:
       title: ADB Serial Port list of connected instances
       description: |
-        Return an ADB Serial Port list of connected instances.
+        This output will include the ADB Serial Port list of connected instances.
+        The  ADB Serial Port are separated with a comma, eg: `localhost:4321,localhost:4322`
+
