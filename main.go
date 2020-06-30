@@ -45,6 +45,9 @@ func ensureGMSAASisInstalled() error {
 	} else {
 		log.Infof("gmsaas is already installed : %s", path)
 	}
+
+	// Set Custom user agent to improve customer support
+	os.Setenv("GMSAAS_USER_AGENT_EXTRA_DATA", "bitrise.io")
 	return nil
 }
 
