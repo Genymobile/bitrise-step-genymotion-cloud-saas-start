@@ -194,7 +194,7 @@ func main() {
 	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
 		instanceName := fmt.Sprint("gminstance_bitrise_", cptInstance)
 		wg.Add(1)
-		if len(adbSerialPortList) > 1 {
+		if len(adbSerialPortList) >= 1 {
 			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
 		} else {
 			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, "")
