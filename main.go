@@ -185,9 +185,13 @@ func main() {
 
 	instancesList := []string{}
 	adbSerialList := []string{}
+	adbSerialPortList := []string{}
 
 	recipesList := strings.Split(c.GMCloudSaaSRecipeUUID, ",")
-	adbSerialPortList := strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
+
+	if len(c.GMCloudSaaSAdbSerialPort) >= 1 {
+		adbSerialPortList = strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
+	}
 
 	buildNumber := os.Getenv("BITRISE_BUILD_NUMBER")
 
