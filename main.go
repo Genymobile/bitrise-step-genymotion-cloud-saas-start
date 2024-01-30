@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"encoding/json"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
@@ -163,14 +164,28 @@ func login(api_token, username, password string) {
 func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) {
 	defer wg.Done()
 
-	cmd := command.New("gmsaas", "instances", "start", recipeUUID, instanceName)
-	instanceUUID, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	cmd := exec.Command("gmsaas", "--format", "json", "instances", "start", recipeUUID, instanceName)
+    output, err := cmd.CombinedOutput()
 	if err != nil {
-		setOperationFailed("Failed to start a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, instanceUUID)
+		setOperationFailed("Failed to start a device, error: %s | output: %s\n", err, output)
 		return
 	}
 
-	log.Infof("Device started %s", instanceUUID)
+	log.Infof("Output parsing JSON:", output)
+
+	// Retrieve INSTANCE_UUID in json output
+	var data map[string]map[string]string
+	err = json.Unmarshal([]byte(output), &data)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return
+	}
+	instanceUUID, found := data["instance"]["uuid"]
+	if found {
+		fmt.Println("UUID value:", instanceUUID)
+	} else {
+		fmt.Println("UUID not found in the JSON.")
+	}
 
 	// Connect to adb with adb-serial-port
 	if adbSerialPort != "" {
