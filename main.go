@@ -25,8 +25,9 @@ var isError bool = false
 
 // Config ...
 type Config struct {
-	GMCloudSaaSEmail    string          `env:"email,required"`
-	GMCloudSaaSPassword stepconf.Secret `env:"password,required"`
+	GMCloudSaaSEmail    string          `env:"email"`
+	GMCloudSaaSPassword stepconf.Secret `env:"password"`
+	GMCloudSaaSAPIToken stepconf.Secret `env:"api_token"`
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
@@ -138,13 +139,24 @@ func configureAndroidSDKPath() {
 	}
 }
 
-func login(username, password string) {
+func login(api_token, username, password string) {
 	log.Infof("Login Genymotion Account")
-	cmd := command.New("gmsaas", "auth", "login", username, password)
-	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+
+    var cmd *exec.Cmd
+	if api_token != "" {
+	    cmd = exec.Command("gmsaas", "auth", "token", api_token)
+    } else if username != "" && password != "" {
+       cmd = exec.Command("gmsaas", "auth", "login", username, password)
+    } else {
+        abortf("Invalid arguments. Must provide either a token or both email and password.")
+        return
+    }
+
+	if out, err := cmd.CombinedOutput(); err != nil {
+	    abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
+	    return
 	}
+
 	log.Infof("Logged to Genymotion Cloud SaaS platform")
 }
 
@@ -195,7 +207,12 @@ func main() {
 		printError("Failed to export %s, error: %v", "GMSAAS_USER_AGENT_EXTRA_DATA", err)
 	}
 
-	login(c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
+    if c.GMCloudSaaSAPIToken != "" {
+        login(string(c.GMCloudSaaSAPIToken), "", "")
+    } else {
+        login("", c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
+    }
+
 
 	instancesList := []string{}
 	adbSerialList := []string{}
