@@ -62,6 +62,9 @@ func ensureGMSAASisInstalled(version string) error {
 			return fmt.Errorf("%s failed, error: %s | output: %s", installCmd.Args, err, out)
 		}
 
+		// Execute asdf reshim pour update PATH
+		exec.Command("asdf", "reshim", "python").CombinedOutput()
+
 		if version != "" {
 			log.Infof("gmsaas %s has been installed.", version)
 		} else {
