@@ -60,8 +60,7 @@ run_if: ""
 
 deps:
   brew:
-  - name: python3
-  - bin_name: pip3
+  - name: pipx  
   apt_get:
   - name: python3-pip
   - bin_name: pip3
