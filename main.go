@@ -53,9 +53,9 @@ func ensureGMSAASisInstalled(version string) error {
 
 		var installCmd *exec.Cmd
 		if version != "" {
-			installCmd = exec.Command("pip3", "install", "gmsaas=="+version)
+			installCmd = exec.Command("pipx", "install", "gmsaas=="+version)
 		} else {
-			installCmd = exec.Command("pip3", "install", "gmsaas")
+			installCmd = exec.Command("pipx", "install", "gmsaas")
 		}
 
 		if out, err := installCmd.CombinedOutput(); err != nil {
