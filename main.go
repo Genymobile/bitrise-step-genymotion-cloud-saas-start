@@ -30,20 +30,34 @@ type Config struct {
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
+	GMCloudSaaSGmsaasVersion    string  `env:"gmsaas_version"`
 }
 
 // install gmsaas if not installed.
-func ensureGMSAASisInstalled() error {
+func ensureGMSAASisInstalled(version string) error {
 	path, err := exec.LookPath("gmsaas")
 	if err != nil {
-		log.Infof("Installing gmsaas ...")
-		cmd := command.New("pip3", "install", "gmsaas")
-		if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-			return fmt.Errorf("%s failed, error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		log.Infof("Installing gmsaas...")
+
+		var installCmd *exec.Cmd
+		if version != "" {
+			installCmd = exec.Command("pip3", "install", "gmsaas=="+version)
+		} else {
+			installCmd = exec.Command("pip3", "install", "gmsaas")
 		}
-		log.Infof("gmsaas has been installed.")
+
+		if out, err := installCmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("%s failed, error: %s | output: %s", installCmd.Args, err, out)
+		}
+
+		if version != "" {
+			log.Infof("gmsaas %s has been installed.", version)
+		} else {
+			log.Infof("gmsaas has been installed.")
+		}
+
 	} else {
-		log.Infof("gmsaas is already installed : %s", path)
+		log.Infof("gmsaas is already installed: %s", path)
 	}
 
 	// Set Custom user agent to improve customer support
@@ -172,7 +186,7 @@ func main() {
 	}
 	stepconf.Print(c)
 
-	if err := ensureGMSAASisInstalled(); err != nil {
+	if err := ensureGMSAASisInstalled(c.GMCloudSaaSGmsaasVersion); err != nil {
 		abortf("%s", err)
 	}
 	configureAndroidSDKPath()

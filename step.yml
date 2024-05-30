@@ -125,6 +125,15 @@ inputs:
           For example:
           `4321,4322,4323`
 
+  - gmsaas_version: "1.9.0"
+    opts:
+        title: gmsaas version
+        summary: ""
+        description: |-
+          Install a specific version of gmsaas, per default it will install the latest gmsaas compatible : 1.9.0
+
+
+
 outputs:
   - GMCLOUD_SAAS_INSTANCE_UUID:
     opts:
