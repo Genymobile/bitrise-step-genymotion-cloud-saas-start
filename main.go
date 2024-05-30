@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"sync"
-	"encoding/json"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
@@ -32,7 +31,18 @@ type Config struct {
 
 	GMCloudSaaSRecipeUUID    string `env:"recipe_uuid,required"`
 	GMCloudSaaSAdbSerialPort string `env:"adb_serial_port"`
-	GMCloudSaaSGmsaasVersion    string  `env:"gmsaas_version"`
+	GMCloudSaaSGmsaasVersion string `env:"gmsaas_version"`
+}
+
+type Instance struct {
+	UUID       string `json:"uuid"`
+	ADB_SERIAL string `json:"adb_serial"`
+	NAME       string `json:"name"`
+}
+
+type Output struct {
+	Instance  Instance   `json:"instance"`
+	Instances []Instance `json:"instances"`
 }
 
 // install gmsaas if not installed.
@@ -84,42 +94,32 @@ func setOperationFailed(format string, args ...interface{}) {
 	isError = true
 }
 
+func getADBSerialFromJSON(jsonData string) string {
+	var output Output
+	if err := json.Unmarshal([]byte(jsonData), &output); err != nil {
+		setOperationFailed("Issue with JSON parsing : %w", err)
+	}
+	return output.Instance.ADB_SERIAL
+}
+
 func getInstanceDetails(name string) (string, string) {
-	for index, line := range getInstancesList() {
-		if index >= 2 {
-			s := strings.Fields(line)
-			if strings.Compare(s[1], name) == 0 {
-				uuid := s[0]
-				serial := s[2]
-				return uuid, serial
-			}
+	cmd := command.New("gmsaas", "--format", "json", "instances", "list")
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		setOperationFailed("Failed to get instances list, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+		return "", ""
+	}
+	var output Output
+	if err := json.Unmarshal([]byte(out), &output); err != nil {
+		setOperationFailed("Issue with JSON parsing : %w", err)
+	}
+
+	for _, instance := range output.Instances {
+		if instance.NAME == name {
+			return instance.UUID, instance.ADB_SERIAL
 		}
 	}
 	return "", ""
-}
-
-func getInstancesList() []string {
-	result := []string{}
-
-	adminList := exec.Command("gmsaas", "instances", "list")
-	out, err := adminList.StdoutPipe()
-	if err != nil {
-		setOperationFailed("Issue with gmsaas command line: %s", err)
-		return result
-	}
-	if err := adminList.Start(); err != nil {
-		setOperationFailed("Issue with gmsaas command line: %s", err)
-		return result
-	}
-	// Create new Scanner.
-	scanner := bufio.NewScanner(out)
-	// Use Scan.
-	for scanner.Scan() {
-		line := scanner.Text()
-		// Append line to result.
-		result = append(result, line)
-	}
-	return result
 }
 
 func configureAndroidSDKPath() {
@@ -143,66 +143,63 @@ func configureAndroidSDKPath() {
 func login(api_token, username, password string) {
 	log.Infof("Login Genymotion Account")
 
-    var cmd *exec.Cmd
+	var cmd *exec.Cmd
 	if api_token != "" {
-	    cmd = exec.Command("gmsaas", "auth", "token", api_token)
-    } else if username != "" && password != "" {
-       cmd = exec.Command("gmsaas", "auth", "login", username, password)
-    } else {
-        abortf("Invalid arguments. Must provide either a token or both email and password.")
-        return
-    }
+		cmd = exec.Command("gmsaas", "auth", "token", api_token)
+	} else if username != "" && password != "" {
+		cmd = exec.Command("gmsaas", "auth", "login", username, password)
+	} else {
+		abortf("Invalid arguments. Must provide either a token or both email and password.")
+		return
+	}
 
 	if out, err := cmd.CombinedOutput(); err != nil {
-	    abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
-	    return
+		abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
+		return
 	}
 
 	log.Infof("Logged to Genymotion Cloud SaaS platform")
 }
 
 func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) {
+	var output Output
 	defer wg.Done()
-
-	cmd := exec.Command("gmsaas", "--format", "json", "instances", "start", recipeUUID, instanceName)
-    output, err := cmd.CombinedOutput()
+	cmd := command.New("gmsaas", "--format", "json", "instances", "start", recipeUUID, instanceName)
+	jsonData, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
-		setOperationFailed("Failed to start a device, error: %s | output: %s\n", err, output)
+		setOperationFailed("Failed to start a device, error: %s | output: %s\n", err, jsonData)
 		return
 	}
 
-	log.Infof("Output parsing JSON:", output)
-
-	// Retrieve INSTANCE_UUID in json output
-	var data map[string]map[string]string
-	err = json.Unmarshal([]byte(output), &data)
-	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
-		return
-	}
-	instanceUUID, found := data["instance"]["uuid"]
-	if found {
-		fmt.Println("UUID value:", instanceUUID)
-	} else {
-		fmt.Println("UUID not found in the JSON.")
+	if err := json.Unmarshal([]byte(jsonData), &output); err != nil {
+		setOperationFailed("Issue with JSON parsing : %s", err)
 	}
 
 	// Connect to adb with adb-serial-port
 	if adbSerialPort != "" {
-		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID, "--adb-serial-port", adbSerialPort)
-		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+		cmd := command.New("gmsaas", "--format", "json", "instances", "adbconnect", output.Instance.UUID, "--adb-serial-port", adbSerialPort)
+		ADBjsonData, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, ADBjsonData)
 			return
+		}
+		if err := json.Unmarshal([]byte(ADBjsonData), &output); err != nil {
+			setOperationFailed("Issue with JSON parsing : %s", err)
 		}
 	} else {
-		cmd := command.New("gmsaas", "instances", "adbconnect", instanceUUID)
-		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+		cmd := command.New("gmsaas", "--format", "json", "instances", "adbconnect", output.Instance.UUID)
+		ADBjsonData, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		if err != nil {
-			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to connect a device, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, ADBjsonData)
 			return
 		}
+		if err := json.Unmarshal([]byte(ADBjsonData), &output); err != nil {
+			setOperationFailed("Issue with JSON parsing : %s", err)
+		}
 	}
+
+	log.Infof("Genymotion instance UUID : %s has been started and connected with ADB Serial Port : %s", output.Instance.UUID, output.Instance.ADB_SERIAL)
+
 }
 
 func main() {
@@ -222,12 +219,11 @@ func main() {
 		printError("Failed to export %s, error: %v", "GMSAAS_USER_AGENT_EXTRA_DATA", err)
 	}
 
-    if c.GMCloudSaaSAPIToken != "" {
-        login(string(c.GMCloudSaaSAPIToken), "", "")
-    } else {
-        login("", c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
-    }
-
+	if c.GMCloudSaaSAPIToken != "" {
+		login(string(c.GMCloudSaaSAPIToken), "", "")
+	} else {
+		login("", c.GMCloudSaaSEmail, string(c.GMCloudSaaSPassword))
+	}
 
 	instancesList := []string{}
 	adbSerialList := []string{}
