@@ -50,23 +50,20 @@ func ensureGMSAASisInstalled(version string) error {
 	path, err := exec.LookPath("gmsaas")
 	if err != nil {
 		log.Infof("Installing gmsaas...")
-
 		var installCmd *exec.Cmd
-		if version != "" {
-			installCmd = exec.Command("pipx", "install", "gmsaas=="+version)
-		} else {
-			installCmd = exec.Command("pipx", "install", "gmsaas")
-		}
 
+		if version != "" {
+			installCmd = exec.Command("pip3", "install", "gmsaas=="+version, "--break-system-packages")
+		} else {
+			installCmd = exec.Command("pip3", "install", "gmsaas", "--break-system-packages")
+		}
 		if out, err := installCmd.CombinedOutput(); err != nil {
 			return fmt.Errorf("%s failed, error: %s | output: %s", installCmd.Args, err, out)
+		} else {
+			log.Infof("%s", out)
 		}
 
-		// Execute asdf reshim pour update PATH
 		exec.Command("asdf", "reshim", "python").CombinedOutput()
-
-		// Execute pipx ensurepath to update PATH
-		exec.Command("pipx", "ensurepath").CombinedOutput()
 
 		if version != "" {
 			log.Infof("gmsaas %s has been installed.", version)
