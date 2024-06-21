@@ -53,16 +53,16 @@ func ensureGMSAASisInstalled(version string) error {
 
 		var installCmd *exec.Cmd
 		if version != "" {
-			installCmd = exec.Command("pip3", "install", "gmsaas=="+version)
+			installCmd = exec.Command("pip3", "install", "gmsaas=="+version, "--break-system-packages")
 		} else {
-			installCmd = exec.Command("pip3", "install", "gmsaas")
+			installCmd = exec.Command("pip3", "install", "gmsaas", "--break-system-packages")
 		}
 
 		if out, err := installCmd.CombinedOutput(); err != nil {
 			return fmt.Errorf("%s failed, error: %s | output: %s", installCmd.Args, err, out)
 		}
 
-		// Execute asdf reshim pour update PATH
+		// Execute asdf reshim to update PATH
 		exec.Command("asdf", "reshim", "python").CombinedOutput()
 
 		if version != "" {
@@ -157,7 +157,7 @@ func login(api_token, username, password string) {
 	}
 
 	if out, err := cmd.CombinedOutput(); err != nil {
-		abortf("Failed to log with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
+		abortf("Failed to login with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
 		return
 	}
 
