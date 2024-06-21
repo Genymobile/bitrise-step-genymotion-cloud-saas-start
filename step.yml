@@ -73,21 +73,26 @@ toolkit:
 
 
 inputs:
+  - api_token: ""
+    opts:
+      title: Genymotion Cloud SaaS API Token
+      summary: ""
+      description: |-
+        API Token to authenticate to your Genymotion Cloud SaaS account. If you don't have an account please register on [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup) and create an [API Token](https://cloud.geny.io/api)
+
   - email: ""
     opts:
       title: Genymotion Cloud SaaS email
       summary: ""
       description: |-
-        Email of your Genymotion Cloud SaaS account, if you don't have an account please create it first on [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
-      is_required: true
+        DEPRECATED : Email of your Genymotion Cloud SaaS account, if you don't have an account please create it first on [https://cloud.geny.io](https://cloud.geny.io/?&utm_source=web-referral&utm_medium=docs&utm_campaign=bitrise&utm_content=signup)
 
   - password: ""
     opts:
       title: Genymotion Cloud SaaS password
       summary: ""
       description: |-
-        Password of your Genymotion Cloud SaaS account.
-      is_required: true
+        DEPRECATED: Password of your Genymotion Cloud SaaS account.
       is_sensitive: true
 
   - recipe_uuid: ""
@@ -125,12 +130,12 @@ inputs:
           For example:
           `4321,4322,4323`
 
-  - gmsaas_version: "1.9.0"
+  - gmsaas_version: "1.11.0"
     opts:
         title: gmsaas version
         summary: ""
         description: |-
-          Install a specific version of gmsaas, per default it will install the latest gmsaas compatible : 1.9.0
+          Install a specific version of gmsaas, per default it will install the latest compatible gmsaas version : 1.11.0
 
 
 

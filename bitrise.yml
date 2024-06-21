@@ -11,6 +11,7 @@ app:
   # Define these in your .bitrise.secrets.yml
   - GMCLOUD_SAAS_EMAIL: $GMCLOUD_SAAS_EMAIL
   - GMCLOUD_SAAS_PASSWORD: $GMCLOUD_SAAS_PASSWORD
+  - GMCLOUD_SAAS_API_TOKEN: $GMCLOUD_SAAS_API_TOKEN
 
 workflows:
   ci:
@@ -20,9 +21,74 @@ workflows:
     - errcheck:
     - go-test:
 
-  test:
-    before_run:
-      - audit-this-step
+
+  test-credentials:
+    steps:
+    - change-workdir:
+        title: Switch working dir to test / _tmp dir
+        description: |-
+          To prevent step testing issues, like referencing relative
+          files with just './some-file' in the step's code, which would
+          work for testing the step from this directory directly
+          but would break if the step is included in another `bitrise.yml`.
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - path::./:
+        title: Genymotion Cloud SaaS Start
+        run_if: "true"
+        inputs:
+        - email: $GMCLOUD_SAAS_EMAIL
+        - password:  $GMCLOUD_SAAS_PASSWORD
+        - recipe_uuid:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_UUID' is: $GMCLOUD_SAAS_INSTANCE_UUID
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
+    - git::https://github.com/Genymobile/bitrise-step-genymotion-cloud-saas-stop.git:
+          title: "Genymotion Cloud SaaS Stop"
+          description: |-
+           Stop Genymotion Cloud SaaS Android Devices.
+          inputs:
+          - instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
+
+  test-api-token:
+    steps:
+    - change-workdir:
+        title: Switch working dir to test / _tmp dir
+        description: |-
+          To prevent step testing issues, like referencing relative
+          files with just './some-file' in the step's code, which would
+          work for testing the step from this directory directly
+          but would break if the step is included in another `bitrise.yml`.
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - path::./:
+        title: Genymotion Cloud SaaS Start
+        run_if: "true"
+        inputs:
+        - api_token: $GMCLOUD_SAAS_API_TOKEN
+        - recipe_uuid: 
+        - adb_serial_port:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_UUID' is: $GMCLOUD_SAAS_INSTANCE_UUID
+            echo "The value of 'GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT' is: $GMCLOUD_SAAS_INSTANCE_ADB_SERIAL_PORT
+    - git::https://github.com/Genymobile/bitrise-step-genymotion-cloud-saas-stop.git:
+          title: "Genymotion Cloud SaaS Stop"
+          description: |-
+           Stop Genymotion Cloud SaaS Android Devices.
+          inputs:
+          - instance_uuid: $GMCLOUD_SAAS_INSTANCE_UUID
+
+  test-adb-serial-port:
     steps:
     - change-workdir:
         title: Switch working dir to test / _tmp dir
