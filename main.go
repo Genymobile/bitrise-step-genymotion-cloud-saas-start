@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
@@ -238,12 +239,14 @@ func main() {
 		adbSerialPortList = strings.Split(c.GMCloudSaaSAdbSerialPort, ",")
 	}
 
-	buildNumber := os.Getenv("BITRISE_BUILD_NUMBER")
-
+	workflowID := os.Getenv("BITRISE_TRIGGERED_WORKFLOW_ID")
+	log.Infof("Use workflow : %s ", workflowID)
 	log.Infof("Start %d Android instances on Genymotion Cloud SaaS", len(recipesList))
 	var wg sync.WaitGroup
+	t := time.Now().UnixNano()
 	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
-		instanceName := fmt.Sprint("gminstance_bitrise_", buildNumber, "_", cptInstance)
+		instanceName := fmt.Sprint("bitrise_", workflowID, "_", t, "_", cptInstance)
+		log.Infof("Start instance : %s  on Genymotion Cloud SaaS", instanceName)
 		wg.Add(1)
 		if len(adbSerialPortList) >= 1 {
 			go startInstanceAndConnect(&wg, recipesList[cptInstance], instanceName, adbSerialPortList[cptInstance])
@@ -255,7 +258,7 @@ func main() {
 
 	for cptInstance := 0; cptInstance < len(recipesList); cptInstance++ {
 
-		instanceName := fmt.Sprint("gminstance_bitrise_", buildNumber, "_", cptInstance)
+		instanceName := fmt.Sprint("bitrise_", workflowID, "_", t, "_", cptInstance)
 		instanceUUID, InstanceADBSerialPort := getInstanceDetails(instanceName)
 
 		instancesList = append(instancesList, instanceUUID)
