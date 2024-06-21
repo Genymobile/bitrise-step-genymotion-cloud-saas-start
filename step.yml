@@ -135,7 +135,7 @@ inputs:
         title: gmsaas version
         summary: ""
         description: |-
-          Install a specific version of gmsaas, per default it will install the latest gmsaas compatible : 1.11.0
+          Install a specific version of gmsaas, per default it will install the latest compatible gmsaas version : 1.11.0
 
 
 
