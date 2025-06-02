@@ -129,7 +129,7 @@ func getADBSerialFromJSON(jsonData string) string {
 }
 
 func getInstanceDetails(name string) (string, string) {
-	args := []string{"--format", "json", "instances", "list"}
+	args := buildGMSAASArgs("instances", "list")
 	jsonData, err := executeCLI(GMSaaSBinary, args...)
 	if err != nil {
 		setOperationFailed("Failed to get instances list, error: %s | output: %s\n", err, jsonData)
@@ -189,7 +189,7 @@ func login(api_token, username, password string) {
 func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSerialPort string) {
 	var output Output
 	defer wg.Done()
-	args := []string{"--format", "json", "instances", "start", recipeUUID, instanceName}
+	args := buildGMSAASArgs("instances", "start", recipeUUID, instanceName)
 
 	jsonData, err := executeCLI(GMSaaSBinary, args...)
 	if err != nil {
@@ -205,9 +205,9 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 	// Connect to adb with adb-serial-port
 	var adbArgs []string
 	if adbSerialPort != "" {
-		adbArgs = []string{"--format", "json", "instances", "adbconnect", output.Instance.UUID, "--adb-serial-port", adbSerialPort}
+		adbArgs = buildGMSAASArgs("instances", "adbconnect", output.Instance.UUID, "--adb-serial-port", adbSerialPort)
 	} else {
-		adbArgs = []string{"--format", "json", "instances", "adbconnect", output.Instance.UUID}
+		adbArgs = buildGMSAASArgs("instances", "adbconnect", output.Instance.UUID)
 	}
 	
 	ADBjsonData, err := executeCLI(GMSaaSBinary, adbArgs...)
@@ -220,6 +220,10 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 	output.Instance.ADB_SERIAL = result["instance"].(map[string]interface{})["adb_serial"].(string)
 	
 	log.Infof("Genymotion instance UUID : %s has been started and connected with ADB Serial Port : %s", output.Instance.UUID, output.Instance.ADB_SERIAL)
+}
+
+func buildGMSAASArgs(args ...string) []string {
+	return append([]string{"--format", "json"}, args...)
 }
 
 func main() {
