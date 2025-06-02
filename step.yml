@@ -130,12 +130,12 @@ inputs:
           For example:
           `4321,4322,4323`
 
-  - gmsaas_version: "1.11.0"
+  - gmsaas_version: ""
     opts:
         title: gmsaas version
         summary: ""
         description: |-
-          Install a specific version of gmsaas, per default it will install the latest compatible gmsaas version : 1.11.0
+          Install a specific version of gmsaas, per default it will install the latest gmsaas version
 
 
 
