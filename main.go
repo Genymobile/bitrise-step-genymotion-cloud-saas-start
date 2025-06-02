@@ -11,7 +11,6 @@ import (
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
-	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 )
 
@@ -152,10 +151,10 @@ func configureAndroidSDKPath() {
 
 	value, exists := os.LookupEnv("ANDROID_HOME")
 	if exists {
-		cmd := command.New("gmsaas", "config", "set", "android-sdk-path", value)
-		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+		args := buildGMSAASArgs("config", "set", "android-sdk-path", value)
+		out, err := executeCLI(GMSaaSBinary, args...)
 		if err != nil {
-			setOperationFailed("Failed to set android-sdk-path, error: error: %s | output: %s", cmd.PrintableCommandArgs(), err, out)
+			setOperationFailed("Failed to set android-sdk-path, error: %s | output: %s", err, out)
 			return
 		}
 		log.Infof("Android SDK is configured")
@@ -168,18 +167,18 @@ func configureAndroidSDKPath() {
 func login(api_token, username, password string) {
 	log.Infof("Login Genymotion Account")
 
-	var cmd *exec.Cmd
+	var args []string
 	if api_token != "" {
-		cmd = exec.Command("gmsaas", "auth", "token", api_token)
+		args = buildGMSAASArgs("auth", "token", api_token)
 	} else if username != "" && password != "" {
-		cmd = exec.Command("gmsaas", "auth", "login", username, password)
+		args = buildGMSAASArgs("auth", "login", username, password)
 	} else {
 		abortf("Invalid arguments. Must provide either a token or both email and password.")
 		return
 	}
-
-	if out, err := cmd.CombinedOutput(); err != nil {
-		abortf("Failed to login with gmsaas, error: error: %s | output: %s", cmd.Args, err, out)
+	_, err := executeCLI(GMSaaSBinary, args...)
+	if err != nil {
+		abortf("Failed to login, error: %s", err)
 		return
 	}
 
