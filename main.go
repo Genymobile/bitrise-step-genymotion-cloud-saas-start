@@ -98,16 +98,16 @@ func setOperationFailed(format string, args ...interface{}) {
 	isError = true
 }
 
-func executeCLI(binary string, args ...string) ([]byte, error) {
-	cmd := exec.Command(binary, args...)
-	
-	// Get output
-	output, err := cmd.Output()
-	if err != nil {
-		setOperationFailed("Fail to execute %w", err)
-		return nil, err
-	}
-	return output, nil
+func executeCLI(binary string, args ...string) ([]byte, []byte, error) {
+    cmd := exec.Command(binary, args...)
+
+    var stdoutBuf, stderrBuf strings.Builder
+    cmd.Stdout = &stdoutBuf
+    cmd.Stderr = &stderrBuf
+
+    err := cmd.Run()
+
+    return []byte(stdoutBuf.String()), []byte(stderrBuf.String()), err
 }
 
 func parseJSON(data []byte) (map[string]interface{}, error) {
@@ -129,14 +129,14 @@ func getADBSerialFromJSON(jsonData string) string {
 
 func getInstanceDetails(name string) (string, string) {
 	args := buildGMSAASArgs("instances", "list")
-	jsonData, err := executeCLI(GMSaaSBinary, args...)
+	stdout, stderr, err := executeCLI(GMSaaSBinary, args...)
 	if err != nil {
-		setOperationFailed("Failed to get instances list, error: %s | output: %s\n", err, jsonData)
+		setOperationFailed("Failed to get instances list, error: %s | stderr: %s | stdout: %s\n", err, stderr, stdout)
 		return "", ""
 	}
 	
 	// Parse the JSON response to get instance details
-	result, _ := parseJSON(jsonData)
+	result, _ := parseJSON(stdout)
 	for _, instances := range result["instances"].([]interface{}) {
 		instance := instances.(map[string]interface{})
 		if instance["name"] == name {
@@ -152,9 +152,9 @@ func configureAndroidSDKPath() {
 	value, exists := os.LookupEnv("ANDROID_HOME")
 	if exists {
 		args := buildGMSAASArgs("config", "set", "android-sdk-path", value)
-		out, err := executeCLI(GMSaaSBinary, args...)
+		stdout, stderr, err := executeCLI(GMSaaSBinary, args...)
 		if err != nil {
-			setOperationFailed("Failed to set android-sdk-path, error: %s | output: %s", err, out)
+			setOperationFailed("Failed to set android-sdk-path, error: %s | stderr: %s | stdout: %s", err, stderr, stdout)
 			return
 		}
 		log.Infof("Android SDK is configured")
@@ -176,9 +176,9 @@ func login(api_token, username, password string) {
 		abortf("Invalid arguments. Must provide either a token or both email and password.")
 		return
 	}
-	_, err := executeCLI(GMSaaSBinary, args...)
+	stdout, stderr, err := executeCLI(GMSaaSBinary, args...)
 	if err != nil {
-		abortf("Failed to login, error: %s", err)
+		abortf("Failed to login, error: %s | stderr: %s | stdout: %s\n", err, stderr, stdout)
 		return
 	}
 
@@ -190,14 +190,14 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 	defer wg.Done()
 	args := buildGMSAASArgs("instances", "start", recipeUUID, instanceName)
 
-	jsonData, err := executeCLI(GMSaaSBinary, args...)
+	stdout, stderr, err := executeCLI(GMSaaSBinary, args...)
 	if err != nil {
-		setOperationFailed("Failed to start a device, error: %s | output: %s\n", err, jsonData)
+		setOperationFailed("Failed to start a device, error: %s | stderr: %s | stdout: %s\n", err, stderr, stdout)
 		return
 	}
 	
 	// Parse the JSON response to get instance details
-	result, _ := parseJSON(jsonData) 
+	result, _ := parseJSON(stdout)
 	output.Instance.UUID = result["instance"].(map[string]interface{})["uuid"].(string)
 	output.Instance.ADB_SERIAL = result["instance"].(map[string]interface{})["adb_serial"].(string)
 
@@ -209,13 +209,13 @@ func startInstanceAndConnect(wg *sync.WaitGroup, recipeUUID, instanceName, adbSe
 		adbArgs = buildGMSAASArgs("instances", "adbconnect", output.Instance.UUID)
 	}
 	
-	ADBjsonData, err := executeCLI(GMSaaSBinary, adbArgs...)
+	adbStdout, adbStderr, err := executeCLI(GMSaaSBinary, adbArgs...)
 	if err != nil {
-		setOperationFailed("Failed to connect a device, error: %s | output: %s\n", err, ADBjsonData)
+		setOperationFailed("Failed to connect a device, error: %s | stderr: %s | stdout: %s\n", err, adbStderr, adbStdout)
 		return
 	}
 	
-	result, _ = parseJSON(ADBjsonData)
+	result, _ = parseJSON(adbStdout)
 	output.Instance.ADB_SERIAL = result["instance"].(map[string]interface{})["adb_serial"].(string)
 	
 	log.Infof("Genymotion instance UUID : %s has been started and connected with ADB Serial Port : %s", output.Instance.UUID, output.Instance.ADB_SERIAL)
